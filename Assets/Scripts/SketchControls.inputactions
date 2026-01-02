@@ -1,0 +1,75 @@
+{
+    "version": 1,
+    "name": "SketchControls",
+    "maps": [
+        {
+            "name": "Sketch",
+            "id": "3067f4bc-2afb-44e4-9a4d-dfff281471aa",
+            "actions": [
+                {
+                    "name": "Draw",
+                    "type": "Value",
+                    "id": "bc87fc62-c005-4b90-9b33-fb136a8a580c",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Erase",
+                    "type": "Value",
+                    "id": "e4f0f013-b6d9-45fc-a86f-e4ad89648e7d",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "AimToBoard",
+                    "type": "Button",
+                    "id": "d6ab9fbc-6f19-4cd8-af04-e29c11cc52a8",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "39fded0c-acd6-49fe-90e5-d83add844408",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Draw",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "724a0854-fe94-479b-9cee-512d0461d4ca",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Erase",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "73d1655e-1417-4396-8f93-21a2ddab532c",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "AimToBoard",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
