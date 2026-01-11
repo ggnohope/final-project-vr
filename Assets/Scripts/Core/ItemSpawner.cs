@@ -60,10 +60,21 @@ public class ItemSpawner : MonoBehaviour
     
     public void SpawnItem(ItemType itemType)
     {
-        if (activeItems.ContainsKey(itemType) && activeItems[itemType] != null)
+        if (itemType == ItemType.DrawingBoard)
         {
-            ReturnItem(itemType);
-            return;
+            if (DrawingModeManager.Instance != null && DrawingModeManager.Instance.IsInDrawingMode)
+            {
+                ReturnItem(itemType);
+                return;
+            }
+        }
+        else
+        {
+            if (activeItems.ContainsKey(itemType) && activeItems[itemType] != null)
+            {
+                ReturnItem(itemType);
+                return;
+            }
         }
         
         GameObject prefab = GetPrefabForType(itemType);
