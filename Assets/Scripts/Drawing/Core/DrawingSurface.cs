@@ -276,6 +276,11 @@ namespace VRDrawing
             PlayAudio(clearAudioClip);
         }
 
+        public void ClearAll()
+        {
+            Clear();
+        }
+
         public void Undo()
         {
             if (historyManager == null || !historyManager.CanUndo) return;

@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using System.Collections.Generic;
+using VRDrawing.Mode;
 
 public class ItemSpawner : MonoBehaviour
 {
@@ -10,14 +11,13 @@ public class ItemSpawner : MonoBehaviour
     
     [Header("Item Prefabs")]
     [SerializeField] private GameObject compassPrefab;
-    [SerializeField] private GameObject drawingBoardPrefab;
+    [SerializeField] private GameObject drawingBoardActivatorPrefab;
     [SerializeField] private GameObject penPrefab;
     
     [Header("Spawn Settings")]
     [SerializeField] private Vector3 spawnOffset = new Vector3(0f, 0f, 0.3f);
     
     private Dictionary<ItemType, GameObject> activeItems = new Dictionary<ItemType, GameObject>();
-    private GameObject placedBoard;
     
     public static ItemSpawner Instance { get; private set; }
     
@@ -81,33 +81,18 @@ public class ItemSpawner : MonoBehaviour
         
         if (itemType == ItemType.DrawingBoard)
         {
-            BoardPlacementController placement = newItem.GetComponent<BoardPlacementController>();
-            if (placement != null)
+            DrawingBoardActivator activator = newItem.GetComponent<DrawingBoardActivator>();
+            if (activator != null)
             {
-                placement.OnBoardPlaced += OnBoardPlaced;
-                placement.OnBoardCancelled += () => OnBoardCancelled(itemType);
-                placement.EnterPlacementMode();
+                activator.ActivateDrawingMode();
             }
             else
             {
-                Debug.LogError("ItemSpawner: DrawingBoard missing BoardPlacementController");
-                Destroy(newItem);
-                activeItems.Remove(itemType);
-                return;
+                Debug.LogError("ItemSpawner: DrawingBoard missing DrawingBoardActivator component");
             }
         }
         
         OnItemSpawned?.Invoke(newItem, itemType);
-    }
-    
-    private void OnBoardPlaced(GameObject board)
-    {
-        placedBoard = board;
-    }
-    
-    private void OnBoardCancelled(ItemType itemType)
-    {
-        ReturnItem(itemType);
     }
     
     private GameObject GetPrefabForType(ItemType itemType)
@@ -117,7 +102,7 @@ public class ItemSpawner : MonoBehaviour
             case ItemType.Compass:
                 return compassPrefab;
             case ItemType.DrawingBoard:
-                return drawingBoardPrefab;
+                return drawingBoardActivatorPrefab;
             case ItemType.Pen:
                 return penPrefab;
             default:
@@ -125,12 +110,13 @@ public class ItemSpawner : MonoBehaviour
         }
     }
     
-    private void OnItemGrabbed()
-    {
-    }
-    
     public void ReturnItem(ItemType itemType)
     {
+        if (itemType == ItemType.DrawingBoard && DrawingModeManager.Instance != null)
+        {
+            DrawingModeManager.Instance.ExitDrawingMode();
+        }
+        
         if (activeItems.ContainsKey(itemType) && activeItems[itemType] != null)
         {
             Destroy(activeItems[itemType]);
@@ -149,7 +135,7 @@ public class ItemSpawner : MonoBehaviour
     {
         foreach (var kvp in activeItems)
         {
-            if (kvp.Value != null && kvp.Value != placedBoard)
+            if (kvp.Value != null)
             {
                 ReturnItem(kvp.Key);
                 return;

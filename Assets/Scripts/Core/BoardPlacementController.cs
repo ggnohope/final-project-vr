@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
+[System.Obsolete("BoardPlacementController is deprecated. Use VRDrawing.Mode.DrawingModeManager instead.")]
 public class BoardPlacementController : MonoBehaviour
 {
     [Header("Placement Settings")]

@@ -28,7 +28,7 @@ namespace VRDrawing.Tools
             }
         }
 
-        public void SetColor(Color newColor)
+        public new void SetColor(Color newColor)
         {
             penColor = newColor;
             
@@ -44,6 +44,11 @@ namespace VRDrawing.Tools
         public void SetWidth(float newWidth)
         {
             penWidth = Mathf.Max(0.001f, newWidth);
+        }
+
+        public override void SetThickness(float thickness)
+        {
+            SetWidth(thickness);
         }
     }
 }

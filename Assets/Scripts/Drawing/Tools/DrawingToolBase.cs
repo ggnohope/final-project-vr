@@ -37,6 +37,7 @@ namespace VRDrawing.Tools
         public abstract float Width { get; }
         public abstract string ToolId { get; }
 
+        public ToolType ToolType => Type;
         public bool IsHeld => isHeld;
         public Vector3 TipPosition => toolTip != null ? toolTip.position : transform.position;
         public Vector3 TipForward => toolTip != null ? toolTip.forward : transform.forward;
@@ -44,6 +45,8 @@ namespace VRDrawing.Tools
         public System.Action<DrawingToolBase, DrawingSurface, Vector3> OnSurfaceTouched;
         public System.Action<DrawingToolBase, DrawingSurface, Vector3> OnSurfaceDraw;
         public System.Action<DrawingToolBase, DrawingSurface> OnSurfaceExited;
+
+        protected bool isEnabled = true;
 
         protected virtual void Awake()
         {
@@ -153,6 +156,20 @@ namespace VRDrawing.Tools
         public virtual void OnToolTipExitSurface(DrawingSurface surface)
         {
             OnSurfaceExited?.Invoke(this, surface);
+        }
+
+        public virtual void SetEnabled(bool enabled)
+        {
+            isEnabled = enabled;
+            gameObject.SetActive(enabled);
+        }
+
+        public virtual void SetColor(Color color)
+        {
+        }
+
+        public virtual void SetThickness(float thickness)
+        {
         }
     }
 }
