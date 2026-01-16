@@ -305,6 +305,12 @@
       },
       "url": "https://packages.unity.com"
     },
+    "wu.yize.gsplat": {
+      "version": "file:D:/unity projects/gsplat-unity",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.unity.modules.accessibility": {
       "version": "1.0.0",
       "depth": 0,

@@ -4420,6 +4420,56 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 41bcc5914542d1944a6ad06a8bd2c816, type: 3}
   m_PrefabInstance: {fileID: 654142562}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &670115839
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 670115841}
+  - component: {fileID: 670115840}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!114 &670115840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670115839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce0eaa90dbf24670a230447dc3ec09f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Gsplat::Gsplat.GsplatRenderer
+  GsplatAsset: {fileID: 4599839170941234424, guid: 389223fe5cfae524ba29852ffbaea31e, type: 3}
+  SHDegree: 3
+  GammaToLinear: 1
+  AsyncUpload: 0
+  UploadBatchSize: 100000
+  RenderBeforeUploadComplete: 1
+--- !u!4 &670115841
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 670115839}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 180}
 --- !u!1 &670424169
 GameObject:
   m_ObjectHideFlags: 0
@@ -18240,3 +18290,4 @@ SceneRoots:
   - {fileID: 670424170}
   - {fileID: 791826347}
   - {fileID: 1764357722}
+  - {fileID: 670115841}
