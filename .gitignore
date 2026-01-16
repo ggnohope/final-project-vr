@@ -70,3 +70,8 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Gaussian Splat outputs
+Assets/Inputs/gs_output/
+Assets/GaussianModels/
+*.ply
