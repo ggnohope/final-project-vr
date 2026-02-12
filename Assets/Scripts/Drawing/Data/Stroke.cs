@@ -8,7 +8,7 @@ namespace VRDrawing.Data
     {
         public List<StrokePoint> points = new List<StrokePoint>();
         public Color color = Color.black;
-        public float width = 0.01f;
+        public float width = 0.0008f;
         public long timestampTicks;
         public string toolId = "pen";
 

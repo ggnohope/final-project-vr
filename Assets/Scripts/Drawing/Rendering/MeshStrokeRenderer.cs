@@ -52,37 +52,82 @@ namespace VRDrawing.Rendering
 
         public override void RebuildAllStrokes(DrawingData data)
         {
-            if (!isInitialized || data == null) return;
+            Debug.Log($"[MeshStrokeRenderer] RebuildAllStrokes START: data.strokes.Count={data?.strokes.Count}");
+            
+            if (!isInitialized || data == null)
+            {
+                Debug.LogWarning($"[MeshStrokeRenderer] Cannot rebuild: initialized={isInitialized}, data={data != null}");
+                return;
+            }
 
             ClearAllStrokes();
 
-            if (data.strokes.Count == 0) return;
+            if (data.strokes.Count == 0)
+            {
+                Debug.LogWarning("[MeshStrokeRenderer] No strokes to rebuild!");
+                return;
+            }
 
             List<CombineInstance> combines = new List<CombineInstance>();
 
             foreach (var stroke in data.strokes)
             {
+                Debug.Log($"[MeshStrokeRenderer] Processing stroke: points={stroke.points.Count}, isValid={stroke.IsValid()}, color={stroke.color}, width={stroke.width}");
+                
                 if (!stroke.IsValid()) continue;
 
                 Mesh strokeMesh = GenerateStrokeMesh(stroke);
                 if (strokeMesh != null && strokeMesh.vertexCount > 0)
                 {
+                    Debug.Log($"[MeshStrokeRenderer] Generated mesh: vertices={strokeMesh.vertexCount}, triangles={strokeMesh.triangles.Length}, bounds={strokeMesh.bounds}");
+                    
                     CombineInstance ci = new CombineInstance();
                     ci.mesh = strokeMesh;
                     ci.transform = Matrix4x4.identity;
                     combines.Add(ci);
                 }
+                else
+                {
+                    Debug.LogWarning($"[MeshStrokeRenderer] Failed to generate mesh for stroke!");
+                }
             }
 
             if (combines.Count > 0)
             {
+                Debug.Log($"[MeshStrokeRenderer] Combining {combines.Count} meshes...");
                 combinedMesh.CombineMeshes(combines.ToArray(), true, false);
                 combinedMesh.RecalculateBounds();
+                
+                Debug.Log($"[MeshStrokeRenderer] Combined mesh: vertices={combinedMesh.vertexCount}, triangles={combinedMesh.triangles.Length}, bounds={combinedMesh.bounds}");
 
                 if (smoothNormals)
                 {
                     combinedMesh.RecalculateNormals();
                 }
+                
+                // QUAN TRỌNG: Kiểm tra MeshFilter
+                if (meshFilter != null && meshFilter.sharedMesh != null)
+                {
+                    Debug.Log($"[MeshStrokeRenderer] ✅ MeshFilter.sharedMesh assigned! vertices={meshFilter.sharedMesh.vertexCount}");
+                }
+                else
+                {
+                    Debug.LogError($"[MeshStrokeRenderer] ❌ MeshFilter or mesh is NULL!");
+                }
+                
+                // QUAN TRỌNG: Kiểm tra MeshRenderer
+                if (meshRenderer != null && meshRenderer.enabled)
+                {
+                    Debug.Log($"[MeshStrokeRenderer] ✅ MeshRenderer enabled! material={meshRenderer.sharedMaterial?.name}");
+                }
+                else
+                {
+                    Debug.LogError($"[MeshStrokeRenderer] ❌ MeshRenderer disabled or NULL!");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("[MeshStrokeRenderer] No valid meshes to combine!");
             }
 
             foreach (var ci in combines)
@@ -94,10 +139,19 @@ namespace VRDrawing.Rendering
             }
         }
 
+
         public override void UpdateStroke(Stroke stroke)
         {
-            if (!isInitialized || surface == null || surface.Data == null) return;
+            Debug.Log($"[MeshStrokeRenderer] UpdateStroke called! stroke.points.Count={stroke?.points.Count}");
+            
+            if (!isInitialized || surface == null || surface.Data == null)
+            {
+                Debug.LogWarning($"[MeshStrokeRenderer] Cannot update: initialized={isInitialized}, surface={surface != null}, data={surface?.Data != null}");
+                return;
+            }
+            
             RebuildAllStrokes(surface.Data);
+            Debug.Log($"[MeshStrokeRenderer] RebuildAllStrokes completed");
         }
 
         public override void ClearAllStrokes()

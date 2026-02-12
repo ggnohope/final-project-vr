@@ -1,30 +1,27 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.XR.Interaction.Toolkit.Locomotion;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
-using UnityEngine.XR.Interaction.Toolkit.Interactors;
-using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 
 namespace VRDrawing.Mode
 {
     public class DrawingModeManager : MonoBehaviour
     {
-        [Header("Drawing Board")]
+        [Header("Prefab References")]
         [SerializeField] private GameObject drawingBoardPrefab;
-        [SerializeField] private float boardDistance = 1.2f;
-        [SerializeField] private float boardHeight = 0.3f;
-        [SerializeField] private Vector3 boardScale = new Vector3(1f, 0.7f, 0.1f);
-
-        [Header("Tool Panel")]
         [SerializeField] private GameObject toolPanelPrefab;
+
+        [Header("Drawing Board Settings")]
+        [SerializeField] private float boardDistance = 1.5f;
+        [SerializeField] private float boardHeight = 0.5f;
+        [SerializeField] private Vector3 boardScale = Vector3.one;
+
+        [Header("Tool Panel Settings")]
         [SerializeField] private Transform toolPanelParent;
         [SerializeField] private float panelDistance = 0.8f;
-        [SerializeField] private float panelHeight = -0.2f;
-
-        [Header("Input")]
-        [SerializeField] private InputActionProperty toggleToolPanelAction;
+        [SerializeField] private float panelHeight = 0.3f;
 
         [Header("Locomotion")]
         [SerializeField] private TeleportationProvider teleportationProvider;
@@ -32,23 +29,26 @@ namespace VRDrawing.Mode
         [SerializeField] private ContinuousTurnProvider continuousTurnProvider;
         [SerializeField] private Transform xrOrigin;
 
-        [Header("UI Ray")]
+        [Header("UI Ray Settings")]
         [SerializeField] private XRRayInteractor uiRayInteractor;
         [SerializeField] private bool autoFindUIRay = true;
 
-        [Header("References")]
+        [Header("Other References")]
         [SerializeField] private Transform playerCamera;
+
+        [Header("Cached Components")]
+        private VRDrawing.Tools.UIRayDrawingTool cachedUIRayDrawingTool;
+        private VRDrawing.DrawingSystemManager cachedDrawingSystemManager;
 
         private GameObject activeDrawingBoard;
         private GameObject activeToolPanel;
-        private XRInteractorLineVisual uiRayLineVisual;
-        
         private bool isInDrawingMode = false;
-        private bool isToolPanelVisible = false;
         private Vector3 lockedPosition;
         private Quaternion lockedRotation;
+        private XRInteractorLineVisual uiRayLineVisual;
 
         public static DrawingModeManager Instance { get; private set; }
+
         public bool IsInDrawingMode => isInDrawingMode;
         public GameObject ActiveDrawingBoard => activeDrawingBoard;
 
@@ -91,7 +91,15 @@ namespace VRDrawing.Mode
             if (uiRayInteractor != null)
             {
                 uiRayLineVisual = uiRayInteractor.GetComponent<XRInteractorLineVisual>();
+                
+                // CACHE UIRayDrawingTool
+                cachedUIRayDrawingTool = uiRayInteractor.GetComponent<VRDrawing.Tools.UIRayDrawingTool>();
             }
+            
+            // CACHE DrawingSystemManager
+            cachedDrawingSystemManager = FindFirstObjectByType<VRDrawing.DrawingSystemManager>();
+
+            DisableAllDrawingComponents();
         }
 
         private void AutoFindLocomotionComponents()
@@ -112,33 +120,9 @@ namespace VRDrawing.Mode
             }
         }
 
-        private void OnEnable()
-        {
-            if (toggleToolPanelAction.action != null)
-            {
-                toggleToolPanelAction.action.Enable();
-                toggleToolPanelAction.action.performed += OnToggleToolPanel;
-            }
-        }
-
-        private void OnDisable()
-        {
-            if (toggleToolPanelAction.action != null)
-            {
-                toggleToolPanelAction.action.performed -= OnToggleToolPanel;
-                toggleToolPanelAction.action.Disable();
-            }
-        }
-
-        private void OnToggleToolPanel(InputAction.CallbackContext context)
-        {
-            if (!isInDrawingMode) return;
-            
-            ToggleToolPanel();
-        }
-
         public void EnterDrawingMode()
         {
+            Debug.Log("[DrawingModeManager] Enter Drawing Mode");
             if (isInDrawingMode) return;
 
             isInDrawingMode = true;
@@ -146,12 +130,16 @@ namespace VRDrawing.Mode
             LockUserPosition();
             DisableLocomotion();
             SpawnDrawingBoard();
+            ShowToolPanel();
+
+            EnableAllDrawingComponents();
 
             OnDrawingModeEntered?.Invoke();
         }
 
         public void ExitDrawingMode()
         {
+            Debug.Log("[DrawingModeManager] Exit Drawing Mode");
             if (!isInDrawingMode) return;
 
             isInDrawingMode = false;
@@ -161,7 +149,72 @@ namespace VRDrawing.Mode
             EnableLocomotion();
             UnlockUserPosition();
 
+            DisableAllDrawingComponents();
+
             OnDrawingModeExited?.Invoke();
+        }
+
+        private void DisableAllDrawingComponents()
+        {
+            Debug.Log("[DrawingModeManager] Disabling all drawing components...");
+
+            if (uiRayInteractor != null)
+            {
+                uiRayInteractor.enabled = false;
+                Debug.Log("[DrawingModeManager] ✓ UI Ray Interactor disabled");
+            }
+
+            if (uiRayLineVisual != null)
+            {
+                uiRayLineVisual.enabled = false;
+                Debug.Log("[DrawingModeManager] ✓ Line Visual disabled");
+            }
+
+            // SỬ DỤNG CACHED REFERENCE thay vì FindObjectsByType
+            if (cachedUIRayDrawingTool != null)
+            {
+                cachedUIRayDrawingTool.enabled = false;
+                Debug.Log($"[DrawingModeManager] ✓ UIRayDrawingTool disabled");
+            }
+
+            if (cachedDrawingSystemManager != null)
+            {
+                cachedDrawingSystemManager.enabled = false;
+                Debug.Log("[DrawingModeManager] ✓ DrawingSystemManager disabled");
+            }
+
+            Debug.Log("[DrawingModeManager] All drawing components disabled");
+        }
+
+        private void EnableAllDrawingComponents()
+        {
+            Debug.Log("[DrawingModeManager] Enabling all drawing components...");
+
+            if (uiRayInteractor != null)
+            {
+                uiRayInteractor.enabled = true;
+                Debug.Log("[DrawingModeManager] ✓ UI Ray Interactor enabled");
+            }
+
+            if (uiRayLineVisual != null)
+            {
+                uiRayLineVisual.enabled = true;
+                Debug.Log("[DrawingModeManager] ✓ Line Visual enabled");
+            }
+
+            if (cachedUIRayDrawingTool != null)
+            {
+                cachedUIRayDrawingTool.enabled = true;
+                Debug.Log($"[DrawingModeManager] ✓ UIRayDrawingTool enabled");
+            }
+
+            if (cachedDrawingSystemManager != null)
+            {
+                cachedDrawingSystemManager.enabled = true;
+                Debug.Log("[DrawingModeManager] ✓ DrawingSystemManager enabled");
+            }
+
+            Debug.Log("[DrawingModeManager] All drawing components enabled");
         }
 
         private void LockUserPosition()
@@ -241,6 +294,8 @@ namespace VRDrawing.Mode
             activeDrawingBoard = Instantiate(drawingBoardPrefab, spawnPosition, spawnRotation);
             activeDrawingBoard.transform.localScale = boardScale;
             activeDrawingBoard.SetActive(true);
+            
+            Debug.Log($"[DrawingModeManager] Drawing board spawned at {spawnPosition}");
         }
 
         private void DespawnDrawingBoard()
@@ -249,6 +304,7 @@ namespace VRDrawing.Mode
             {
                 Destroy(activeDrawingBoard);
                 activeDrawingBoard = null;
+                Debug.Log("[DrawingModeManager] Drawing board despawned");
             }
         }
 
@@ -268,18 +324,6 @@ namespace VRDrawing.Mode
             forward.Normalize();
 
             return Quaternion.LookRotation(forward);
-        }
-
-        public void ToggleToolPanel()
-        {
-            if (isToolPanelVisible)
-            {
-                HideToolPanel();
-            }
-            else
-            {
-                ShowToolPanel();
-            }
         }
 
         public void ShowToolPanel()
@@ -302,8 +346,7 @@ namespace VRDrawing.Mode
             }
 
             activeToolPanel.SetActive(true);
-            isToolPanelVisible = true;
-            UpdateUIRayVisibility(true);
+            Debug.Log("[DrawingModeManager] Tool panel shown");
         }
 
         public void HideToolPanel()
@@ -311,10 +354,8 @@ namespace VRDrawing.Mode
             if (activeToolPanel != null)
             {
                 activeToolPanel.SetActive(false);
+                Debug.Log("[DrawingModeManager] Tool panel hidden");
             }
-
-            isToolPanelVisible = false;
-            UpdateUIRayVisibility(false);
         }
 
         private Vector3 CalculatePanelPosition()
@@ -333,29 +374,6 @@ namespace VRDrawing.Mode
             forward.Normalize();
 
             return Quaternion.LookRotation(forward);
-        }
-
-        private void UpdateUIRayVisibility(bool visible)
-        {
-            if (uiRayInteractor != null)
-            {
-                uiRayInteractor.enabled = visible;
-
-                if (uiRayLineVisual == null)
-                {
-                    uiRayLineVisual = uiRayInteractor.GetComponent<XRInteractorLineVisual>();
-                }
-
-                if (uiRayLineVisual != null)
-                {
-                    uiRayLineVisual.enabled = visible;
-                }
-            }
-        }
-
-        public void OnToolSelected()
-        {
-            HideToolPanel();
         }
     }
 }

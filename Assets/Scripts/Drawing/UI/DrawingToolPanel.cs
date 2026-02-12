@@ -12,25 +12,15 @@ namespace VRDrawing.UI
         [SerializeField] private Button eraserButton;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button clearButton;
+        [SerializeField] private Button imageButton; // THÊM DÒNG NÀY
 
         [Header("Color Buttons")]
         [SerializeField] private Button[] colorButtons;
-        [SerializeField] private Color[] colorPalette = new Color[]
-        {
-            Color.black,
-            Color.white,
-            Color.red,
-            Color.green,
-            Color.blue,
-            Color.yellow,
-            Color.cyan,
-            Color.magenta
-        };
 
         [Header("Thickness Control")]
         [SerializeField] private Slider thicknessSlider;
-        [SerializeField] private float minThickness = 0.002f;
-        [SerializeField] private float maxThickness = 0.02f;
+        [SerializeField] private float minThickness = 0.0008f;
+        [SerializeField] private float maxThickness = 0.008f;
 
         [Header("Current Tool Display")]
         [SerializeField] private Image currentToolIcon;
@@ -38,7 +28,7 @@ namespace VRDrawing.UI
 
         private ToolType currentToolType = ToolType.Pen;
         private Color currentColor = Color.black;
-        private float currentThickness = 0.005f;
+        private float currentThickness = 0.001f;
 
         private void Awake()
         {
@@ -70,26 +60,24 @@ namespace VRDrawing.UI
             {
                 clearButton.onClick.AddListener(Clear);
             }
+
+            // THÊM SETUP CHO IMAGE BUTTON
+            if (imageButton != null)
+            {
+                imageButton.onClick.AddListener(OpenPhotoGallery);
+            }
         }
 
         private void SetupColorButtons()
         {
             if (colorButtons == null || colorButtons.Length == 0) return;
 
-            for (int i = 0; i < colorButtons.Length && i < colorPalette.Length; i++)
+            for (int i = 0; i < colorButtons.Length; i++)
             {
-                int index = i;
-                Color color = colorPalette[i];
-
-                if (colorButtons[i] != null)
+                Image buttonImage = colorButtons[i].GetComponent<Image>();
+                if (buttonImage != null)
                 {
-                    Image buttonImage = colorButtons[i].GetComponent<Image>();
-                    if (buttonImage != null)
-                    {
-                        buttonImage.color = color;
-                    }
-
-                    colorButtons[i].onClick.AddListener(() => SetColor(color));
+                    colorButtons[i].onClick.AddListener(() => SetColor(buttonImage.color));
                 }
             }
         }
@@ -109,7 +97,6 @@ namespace VRDrawing.UI
             currentToolType = toolType;
             UpdateCurrentToolDisplay();
             NotifyToolChange();
-            AutoHidePanel();
         }
 
         private void SetColor(Color color)
@@ -117,7 +104,6 @@ namespace VRDrawing.UI
             currentColor = color;
             UpdateCurrentToolDisplay();
             NotifyColorChange();
-            AutoHidePanel();
         }
 
         private void SetThickness(float thickness)
@@ -144,6 +130,20 @@ namespace VRDrawing.UI
             }
         }
 
+        // THÊM METHOD MỚI CHO IMAGE BUTTON
+        private void OpenPhotoGallery()
+        {
+            if (PhotoGalleryUI.Instance != null)
+            {
+                PhotoGalleryUI.Instance.ToggleGallery();
+                Debug.Log("[DrawingToolPanel] 📸 Photo Gallery opened!");
+            }
+            else
+            {
+                Debug.LogWarning("[DrawingToolPanel] PhotoGalleryUI not found in scene!");
+            }
+        }
+
         private void UpdateCurrentToolDisplay()
         {
             if (currentColorDisplay != null)
@@ -163,13 +163,13 @@ namespace VRDrawing.UI
 
         private void NotifyColorChange()
         {
+            Debug.Log($"[DrawingToolPanel] 🎨 NotifyColorChange! color={currentColor}");
+            
             DrawingToolBase[] tools = FindObjectsByType<DrawingToolBase>(FindObjectsSortMode.None);
+            Debug.Log($"[DrawingToolPanel] Found {tools.Length} tools");            
             foreach (var tool in tools)
             {
-                if (tool is PenTool penTool)
-                {
-                    penTool.SetColor(currentColor);
-                }
+                tool.SetColor(currentColor);
             }
         }
 
@@ -190,14 +190,6 @@ namespace VRDrawing.UI
             }
 
             return DrawingModeManager.Instance.ActiveDrawingBoard.GetComponentInChildren<DrawingSurface>();
-        }
-
-        private void AutoHidePanel()
-        {
-            if (DrawingModeManager.Instance != null)
-            {
-                DrawingModeManager.Instance.OnToolSelected();
-            }
         }
     }
 }

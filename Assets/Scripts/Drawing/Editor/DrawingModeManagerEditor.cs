@@ -20,7 +20,7 @@ namespace VRDrawing.Editor
 
         private bool showBoardSettings = true;
         private bool showToolPanelSettings = true;
-        private bool showInputSettings = true;
+        private bool showInputSettings = false;
         private bool showLocomotionSettings = true;
         private bool showUISettings = true;
         private bool showReferenceSettings = true;
@@ -98,8 +98,8 @@ namespace VRDrawing.Editor
 
             GUILayout.Space(10);
 
-            showInputSettings = EditorGUILayout.Foldout(showInputSettings, "Input Settings", true);
-            if (showInputSettings)
+            showInputSettings = EditorGUILayout.Foldout(showInputSettings, "Input Settings (Optional)", true);
+            if (showInputSettings && toggleToolPanelAction != null)
             {
                 EditorGUI.indentLevel++;
                 EditorGUILayout.PropertyField(toggleToolPanelAction);
@@ -321,18 +321,21 @@ namespace VRDrawing.Editor
                 valid = false;
             }
 
-            SerializedProperty useReference = toggleToolPanelAction.FindPropertyRelative("m_UseReference");
-            SerializedProperty reference = toggleToolPanelAction.FindPropertyRelative("m_Reference");
-            
-            if (useReference != null && reference != null)
+            if (toggleToolPanelAction != null)
             {
-                bool isUsingReference = useReference.boolValue;
-                bool hasReference = reference.objectReferenceValue != null;
+                SerializedProperty useReference = toggleToolPanelAction.FindPropertyRelative("m_UseReference");
+                SerializedProperty reference = toggleToolPanelAction.FindPropertyRelative("m_Reference");
                 
-                if (!isUsingReference || !hasReference)
+                if (useReference != null && reference != null)
                 {
-                    Debug.LogWarning("⚠ Toggle Tool Panel Action not assigned (Y Button)");
-                    warnings++;
+                    bool isUsingReference = useReference.boolValue;
+                    bool hasReference = reference.objectReferenceValue != null;
+                    
+                    if (!isUsingReference || !hasReference)
+                    {
+                        Debug.LogWarning("⚠ Toggle Tool Panel Action not assigned (Y Button)");
+                        warnings++;
+                    }
                 }
             }
 

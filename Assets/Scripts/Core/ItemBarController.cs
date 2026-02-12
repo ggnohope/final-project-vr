@@ -158,6 +158,17 @@ public class ItemBarController : MonoBehaviour
     
     private void UpdateUIRayVisibility(bool visible)
     {
+        // CRITICAL: Don't disable UI Ray when Drawing Mode is active
+        if (!visible)
+        {
+            var drawingManager = VRDrawing.Mode.DrawingModeManager.Instance;
+            if (drawingManager != null && drawingManager.IsInDrawingMode)
+            {
+                Debug.Log("[ItemBarController] Keeping UI Ray enabled - Drawing Mode is active");
+                return; // Don't disable UI Ray
+            }
+        }
+        
         if (uiRayInteractor != null)
         {
             uiRayInteractor.enabled = visible;
@@ -186,6 +197,7 @@ public class ItemBarController : MonoBehaviour
             }
         }
     }
+
     
     private void PositionBarInFrontOfPlayer()
     {

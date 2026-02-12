@@ -12,7 +12,7 @@ public class ItemSpawner : MonoBehaviour
     [Header("Item Prefabs")]
     [SerializeField] private GameObject compassPrefab;
     [SerializeField] private GameObject drawingBoardActivatorPrefab;
-    [SerializeField] private GameObject penPrefab;
+    [SerializeField] private GameObject cameraPrefab;
     
     [Header("Spawn Settings")]
     [SerializeField] private Vector3 spawnOffset = new Vector3(0f, 0f, 0.3f);
@@ -114,8 +114,8 @@ public class ItemSpawner : MonoBehaviour
                 return compassPrefab;
             case ItemType.DrawingBoard:
                 return drawingBoardActivatorPrefab;
-            case ItemType.Pen:
-                return penPrefab;
+            case ItemType.Camera:
+                return cameraPrefab;
             default:
                 return null;
         }

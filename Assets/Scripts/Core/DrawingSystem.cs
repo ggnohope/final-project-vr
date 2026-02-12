@@ -7,7 +7,7 @@ public class DrawingSystem : MonoBehaviour
     [Header("Drawing Settings")]
     [SerializeField] private float maxDrawingDistance = 0.05f;
     [SerializeField] private float minPointDistance = 0.001f;
-    [SerializeField] private float lineWidth = 0.01f;
+    [SerializeField] private float lineWidth = 0.008f;
     
     [Header("Line Settings")]
     [SerializeField] private Material lineMaterial;

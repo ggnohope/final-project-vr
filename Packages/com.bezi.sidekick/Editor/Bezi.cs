@@ -1,4 +1,3 @@
-internal static class BeziAssembly
-{
+internal static class BeziAssembly {
     // Do not remove this file 
 }

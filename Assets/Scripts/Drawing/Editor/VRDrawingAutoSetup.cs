@@ -324,9 +324,9 @@ namespace VRDrawing.Editor
             sliderRect.sizeDelta = new Vector2(300, 20);
 
             UnityEngine.UI.Slider slider = sliderObj.AddComponent<UnityEngine.UI.Slider>();
-            slider.minValue = 0.002f;
-            slider.maxValue = 0.02f;
-            slider.value = 0.005f;
+            slider.minValue = 0.0008f;
+            slider.maxValue = 0.008f;
+            slider.value = 0.001f;
 
             GameObject bg = new GameObject("Background");
             bg.transform.SetParent(sliderObj.transform, false);
