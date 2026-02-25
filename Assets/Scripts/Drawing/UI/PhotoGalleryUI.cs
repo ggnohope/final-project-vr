@@ -141,12 +141,11 @@ namespace VRDrawing.UI
 
             Vector3 targetPosition = playerCamera.transform.position + forward * panelDistance + Vector3.up * panelHeight;
             
-            Quaternion targetRotation = Quaternion.LookRotation(forward);
-
             galleryPanel.transform.position = targetPosition;
-            galleryPanel.transform.rotation = targetRotation;
+            galleryPanel.transform.LookAt(playerCamera.transform.position);
+            galleryPanel.transform.Rotate(0, 180, 0);
             
-            Debug.Log($"[PhotoGalleryUI] Positioned panel at {targetPosition}");
+            Debug.Log($"[PhotoGalleryUI] Positioned panel at {targetPosition}, facing camera");
         }
 
         private void RefreshGallery()

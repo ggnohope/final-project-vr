@@ -10285,6 +10285,18 @@ MonoBehaviour:
   photoOffsetFromSurface: 0.001
   photoMaterial: {fileID: 0}
   uiRayInteractor: {fileID: 696807387}
+  placePhotoAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Place Photo
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 1119304e-81b3-489e-ac05-676ff6869352
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
 --- !u!4 &1316155325
 Transform:
   m_ObjectHideFlags: 0
@@ -17294,7 +17306,6 @@ MonoBehaviour:
     m_Reference: {fileID: 2237574590685524861, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   itemBar: {fileID: 2072050759}
   itemSpawner: {fileID: 0}
-  drawingSystem: {fileID: 0}
 --- !u!4 &2034617639
 Transform:
   m_ObjectHideFlags: 0
@@ -18444,6 +18455,50 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Spacing.x
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Spacing.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_CellSize.x
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_CellSize.y
+      value: 120
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Constraint
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Padding.m_Top
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_ChildAlignment
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Padding.m_Left
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_ConstraintCount
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Padding.m_Right
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3198410761700382881, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
+      propertyPath: m_Padding.m_Bottom
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 3771269091248417590, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -18546,7 +18601,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5468304939494594275, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 9.142946
+      value: 7.000765
       objectReference: {fileID: 0}
     - target: {fileID: 6889935849569334401, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
       propertyPath: m_AnchorMax.y

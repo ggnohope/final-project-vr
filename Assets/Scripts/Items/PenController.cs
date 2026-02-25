@@ -52,8 +52,6 @@ public class PenController : MonoBehaviour
             grabInteractable.selectEntered.AddListener(OnGrabbed);
             grabInteractable.selectExited.AddListener(OnReleased);
         }
-        
-        DrawingSystem.Instance?.RegisterPen(this);
     }
     
     private void OnDisable()
@@ -63,8 +61,6 @@ public class PenController : MonoBehaviour
             grabInteractable.selectEntered.RemoveListener(OnGrabbed);
             grabInteractable.selectExited.RemoveListener(OnReleased);
         }
-        
-        DrawingSystem.Instance?.UnregisterPen(this);
     }
     
     private void OnGrabbed(UnityEngine.XR.Interaction.Toolkit.SelectEnterEventArgs args)

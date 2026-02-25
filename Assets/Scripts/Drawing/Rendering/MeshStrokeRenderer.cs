@@ -8,7 +8,6 @@ namespace VRDrawing.Rendering
     {
         [Header("Mesh Settings")]
         [SerializeField] private Material strokeMaterial;
-        [SerializeField] private int segmentsPerUnit = 100;
         [SerializeField] private bool smoothNormals = true;
 
         private DrawingSurface surface;
@@ -42,6 +41,16 @@ namespace VRDrawing.Rendering
             meshRenderer.material = strokeMaterial;
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             meshRenderer.receiveShadows = false;
+            
+            int surfaceLayer = surface.gameObject.layer;
+            gameObject.layer = surfaceLayer;
+            
+            if (transform.parent != surface.transform)
+            {
+                transform.SetParent(surface.transform, false);
+            }
+            
+            Debug.Log($"[MeshStrokeRenderer] Initialize: GameObject={gameObject.name}, Layer={surfaceLayer} ({LayerMask.LayerToName(surfaceLayer)}), Parent={transform.parent?.name}");
 
             combinedMesh = new Mesh();
             combinedMesh.name = "DrawingMesh";
@@ -218,6 +227,7 @@ namespace VRDrawing.Rendering
                 if (i < stroke.points.Count - 1)
                 {
                     int baseIndex = i * 2;
+                    
                     triangles.Add(baseIndex);
                     triangles.Add(baseIndex + 2);
                     triangles.Add(baseIndex + 1);

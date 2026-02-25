@@ -58,14 +58,14 @@ namespace VRDrawing.Setup
 
         private void SetupAllBoards()
         {
-            BoardPlacementController[] boards = FindObjectsByType<BoardPlacementController>(FindObjectsSortMode.None);
+            DrawingSurface[] surfaces = FindObjectsByType<DrawingSurface>(FindObjectsSortMode.None);
 
-            foreach (var board in boards)
+            foreach (var surface in surfaces)
             {
-                SetupBoardDrawingSurface(board.gameObject);
+                SetupBoardDrawingSurface(surface.gameObject);
             }
 
-            Debug.Log($"Setup {boards.Length} drawing boards");
+            Debug.Log($"[RuntimeDrawingSetup] Setup {surfaces.Length} drawing surfaces");
         }
 
         private void SetupBoardDrawingSurface(GameObject board)

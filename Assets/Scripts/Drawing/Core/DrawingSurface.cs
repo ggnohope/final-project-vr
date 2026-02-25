@@ -48,11 +48,6 @@ namespace VRDrawing
             if (DrawingSystemManager.Instance != null)
             {
                 DrawingSystemManager.Instance.RegisterSurface(this);
-                Debug.Log($"[DrawingSurface] Registered {name} with DrawingSystemManager");
-            }
-            else
-            {
-                Debug.LogWarning($"[DrawingSurface] DrawingSystemManager.Instance is NULL!");
             }
 
             surfaceCollider = GetComponent<Collider>();

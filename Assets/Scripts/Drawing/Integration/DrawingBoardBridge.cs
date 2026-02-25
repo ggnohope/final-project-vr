@@ -1,49 +1,29 @@
 using UnityEngine;
 using VRDrawing;
+using VRDrawing.Mode;
 
 public class DrawingBoardBridge : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private BoardPlacementController placementController;
+    [SerializeField] private DrawingModeManager modeManager;
     [SerializeField] private DrawingSurface drawingSurface;
 
     [Header("Auto Setup")]
-    [SerializeField] private bool autoSetupOnPlacement = true;
+    [SerializeField] private bool autoSetupOnAwake = true;
 
     private void Awake()
     {
-        if (placementController == null)
+        if (modeManager == null)
         {
-            placementController = GetComponent<BoardPlacementController>();
+            modeManager = FindFirstObjectByType<DrawingModeManager>();
         }
 
         if (drawingSurface == null)
         {
             drawingSurface = GetComponentInChildren<DrawingSurface>();
         }
-    }
-
-    private void OnEnable()
-    {
-        if (placementController != null)
-        {
-            placementController.OnBoardPlaced += OnBoardPlaced;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (placementController != null)
-        {
-            placementController.OnBoardPlaced -= OnBoardPlaced;
-        }
-    }
-
-    private void OnBoardPlaced(GameObject board)
-    {
-        if (!autoSetupOnPlacement) return;
-
-        if (drawingSurface != null)
+        
+        if (autoSetupOnAwake && drawingSurface != null)
         {
             if (DrawingSystemManager.Instance != null)
             {

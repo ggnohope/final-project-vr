@@ -187,21 +187,37 @@ namespace VRItems.Camera
         {
             yield return new WaitForEndOfFrame();
 
-            RenderTexture currentRT = RenderTexture.active;
-            RenderTexture tempRT = RenderTexture.GetTemporary(photoWidth, photoHeight, 24);
+            Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
             
-            captureCamera.targetTexture = tempRT;
-            captureCamera.Render();
+            if (screenshot == null)
+            {
+                Debug.LogError("[CameraModeManager] Failed to capture screenshot!");
+                yield break;
+            }
             
-            RenderTexture.active = tempRT;
+            Texture2D photo = null;
             
-            Texture2D photo = new Texture2D(photoWidth, photoHeight, TextureFormat.RGB24, false);
-            photo.ReadPixels(new Rect(0, 0, photoWidth, photoHeight), 0, 0);
-            photo.Apply();
-            
-            captureCamera.targetTexture = null;
-            RenderTexture.active = currentRT;
-            RenderTexture.ReleaseTemporary(tempRT);
+            if (screenshot.width != photoWidth || screenshot.height != photoHeight)
+            {
+                RenderTexture rt = RenderTexture.GetTemporary(photoWidth, photoHeight, 0, RenderTextureFormat.ARGB32);
+                RenderTexture currentRT = RenderTexture.active;
+                
+                Graphics.Blit(screenshot, rt);
+                RenderTexture.active = rt;
+                
+                photo = new Texture2D(photoWidth, photoHeight, TextureFormat.RGB24, false);
+                photo.ReadPixels(new Rect(0, 0, photoWidth, photoHeight), 0, 0);
+                photo.Apply();
+                
+                RenderTexture.active = currentRT;
+                RenderTexture.ReleaseTemporary(rt);
+                
+                Destroy(screenshot);
+            }
+            else
+            {
+                photo = screenshot;
+            }
             
             if (PhotoAttachmentManager.Instance != null)
             {
@@ -215,7 +231,7 @@ namespace VRItems.Camera
             
             OnPhotoCaptured?.Invoke(photo);
             
-            Debug.Log($"[CameraModeManager] Photo captured! {photoWidth}x{photoHeight}");
+            Debug.Log($"[CameraModeManager] Photo captured! {photo.width}x{photo.height}");
 
             if (viewfinderUI != null && restoreUIState)
             {

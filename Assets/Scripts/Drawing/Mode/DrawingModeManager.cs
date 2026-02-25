@@ -338,15 +338,18 @@ namespace VRDrawing.Mode
 
             if (activeToolPanel == null)
             {
-                Vector3 panelPosition = CalculatePanelPosition();
-                Quaternion panelRotation = CalculatePanelRotation();
-
                 Transform parent = toolPanelParent != null ? toolPanelParent : null;
-                activeToolPanel = Instantiate(toolPanelPrefab, panelPosition, panelRotation, parent);
+                activeToolPanel = Instantiate(toolPanelPrefab, parent);
             }
 
+            Vector3 panelPosition = CalculatePanelPosition();
+            Quaternion panelRotation = CalculatePanelRotation();
+            
+            activeToolPanel.transform.position = panelPosition;
+            activeToolPanel.transform.rotation = panelRotation;
             activeToolPanel.SetActive(true);
-            Debug.Log("[DrawingModeManager] Tool panel shown");
+            
+            Debug.Log($"[DrawingModeManager] Tool panel shown at {panelPosition}");
         }
 
         public void HideToolPanel()
