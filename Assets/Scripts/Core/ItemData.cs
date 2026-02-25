@@ -4,7 +4,7 @@ public enum ItemType
 {
     Compass,
     DrawingBoard,
-    Pen
+    Map
 }
 
 [System.Serializable]

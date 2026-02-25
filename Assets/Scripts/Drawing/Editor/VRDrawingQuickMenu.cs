@@ -174,12 +174,6 @@ namespace VRDrawing.Editor
                 so.FindProperty("toolPanelPrefab").objectReferenceValue = panelPrefab;
             }
 
-            var teleport = Object.FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation.TeleportationProvider>();
-            if (teleport != null)
-            {
-                so.FindProperty("teleportationProvider").objectReferenceValue = teleport;
-            }
-
             var move = Object.FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>();
             if (move != null)
             {

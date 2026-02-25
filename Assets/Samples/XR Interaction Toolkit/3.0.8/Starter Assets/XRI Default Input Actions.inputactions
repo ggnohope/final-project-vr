@@ -464,6 +464,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Confirm",
+                    "type": "Button",
+                    "id": "de97a31c-1d58-49d8-90d4-fbc1f671f458",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Return Item",
                     "type": "Button",
                     "id": "110cb1c4-0f27-42a5-9b92-ef0905c7cdf5",
@@ -889,6 +898,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Toggle Bar",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b029a2fb-df11-4467-8642-8db6a547ad50",
+                    "path": "<XRController>{LeftHand}/{PrimaryButton}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Confirm",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

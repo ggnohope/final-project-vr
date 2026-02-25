@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
+#pragma warning disable CS0618 // Type or member is obsolete
+
 public class PenController : MonoBehaviour
 {
     [Header("Pen Settings")]
@@ -52,8 +54,6 @@ public class PenController : MonoBehaviour
             grabInteractable.selectEntered.AddListener(OnGrabbed);
             grabInteractable.selectExited.AddListener(OnReleased);
         }
-        
-        DrawingSystem.Instance?.RegisterPen(this);
     }
     
     private void OnDisable()
@@ -63,8 +63,6 @@ public class PenController : MonoBehaviour
             grabInteractable.selectEntered.RemoveListener(OnGrabbed);
             grabInteractable.selectExited.RemoveListener(OnReleased);
         }
-        
-        DrawingSystem.Instance?.UnregisterPen(this);
     }
     
     private void OnGrabbed(UnityEngine.XR.Interaction.Toolkit.SelectEnterEventArgs args)

@@ -534,13 +534,6 @@ namespace VRDrawing.Editor
                 Debug.Log("✓ Assigned Tool Panel Prefab");
             }
 
-            var teleportProvider = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation.TeleportationProvider>();
-            if (teleportProvider != null)
-            {
-                so.FindProperty("teleportationProvider").objectReferenceValue = teleportProvider;
-                Debug.Log("✓ Assigned Teleportation Provider");
-            }
-
             var moveProvider = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>();
             if (moveProvider != null)
             {

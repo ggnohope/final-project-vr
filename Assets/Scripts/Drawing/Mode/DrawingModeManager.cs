@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion;
-using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
@@ -27,8 +26,8 @@ namespace VRDrawing.Mode
         [SerializeField] private InputActionProperty toggleToolPanelAction;
 
         [Header("Locomotion")]
-        [SerializeField] private TeleportationProvider teleportationProvider;
         [SerializeField] private ContinuousMoveProvider continuousMoveProvider;
+        [SerializeField] private SnapTurnProvider snapTurnProvider;
         [SerializeField] private ContinuousTurnProvider continuousTurnProvider;
         [SerializeField] private Transform xrOrigin;
 
@@ -96,14 +95,14 @@ namespace VRDrawing.Mode
 
         private void AutoFindLocomotionComponents()
         {
-            if (teleportationProvider == null)
-            {
-                teleportationProvider = FindFirstObjectByType<TeleportationProvider>();
-            }
-
             if (continuousMoveProvider == null)
             {
                 continuousMoveProvider = FindFirstObjectByType<ContinuousMoveProvider>();
+            }
+
+            if (snapTurnProvider == null)
+            {
+                snapTurnProvider = FindFirstObjectByType<SnapTurnProvider>();
             }
 
             if (continuousTurnProvider == null)
@@ -188,14 +187,14 @@ namespace VRDrawing.Mode
 
         private void DisableLocomotion()
         {
-            if (teleportationProvider != null)
-            {
-                teleportationProvider.enabled = false;
-            }
-
             if (continuousMoveProvider != null)
             {
                 continuousMoveProvider.enabled = false;
+            }
+
+            if (snapTurnProvider != null)
+            {
+                snapTurnProvider.enabled = false;
             }
 
             if (continuousTurnProvider != null)
@@ -206,14 +205,14 @@ namespace VRDrawing.Mode
 
         private void EnableLocomotion()
         {
-            if (teleportationProvider != null)
-            {
-                teleportationProvider.enabled = true;
-            }
-
             if (continuousMoveProvider != null)
             {
                 continuousMoveProvider.enabled = true;
+            }
+
+            if (snapTurnProvider != null)
+            {
+                snapTurnProvider.enabled = true;
             }
 
             if (continuousTurnProvider != null)

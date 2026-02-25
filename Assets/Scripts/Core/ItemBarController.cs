@@ -4,6 +4,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using System.Collections.Generic;
+using Core;
 
 public class ItemBarController : MonoBehaviour
 {
@@ -213,11 +214,21 @@ public class ItemBarController : MonoBehaviour
         {
             spawnedItems[itemType] = false;
             UpdateButtonHighlights();
+            
+            if (itemType == ItemType.Map)
+            {
+                OnMapClosed();
+            }
         }
         else
         {
             spawnedItems[itemType] = true;
             UpdateButtonHighlights();
+            
+            if (itemType == ItemType.Map)
+            {
+                OnMapOpened();
+            }
         }
         
         OnItemSelected?.Invoke(itemType);
@@ -286,6 +297,27 @@ public class ItemBarController : MonoBehaviour
         {
             spawnedItems[itemType] = false;
             UpdateButtonHighlights();
+            
+            if (itemType == ItemType.Map)
+            {
+                OnMapClosed();
+            }
+        }
+    }
+
+    private void OnMapOpened()
+    {
+        if (MapLocomotionController.Instance != null)
+        {
+            MapLocomotionController.Instance.OnMapOpened();
+        }
+    }
+
+    private void OnMapClosed()
+    {
+        if (MapLocomotionController.Instance != null)
+        {
+            MapLocomotionController.Instance.OnMapClosed();
         }
     }
 }

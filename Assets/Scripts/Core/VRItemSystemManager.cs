@@ -9,7 +9,6 @@ public class VRItemSystemManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private ItemBarController itemBar;
     [SerializeField] private ItemSpawner itemSpawner;
-    [SerializeField] private DrawingSystem drawingSystem;
     
     public static VRItemSystemManager Instance { get; private set; }
     
@@ -27,7 +26,6 @@ public class VRItemSystemManager : MonoBehaviour
         
         if (itemBar == null) itemBar = FindFirstObjectByType<ItemBarController>();
         if (itemSpawner == null) itemSpawner = FindFirstObjectByType<ItemSpawner>();
-        if (drawingSystem == null) drawingSystem = FindFirstObjectByType<DrawingSystem>();
     }
     
     private void OnEnable()

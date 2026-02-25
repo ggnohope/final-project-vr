@@ -11,8 +11,8 @@ namespace VRDrawing.Editor
         private SerializedProperty drawingBoardPrefab;
         private SerializedProperty toolPanelPrefab;
         private SerializedProperty toggleToolPanelAction;
-        private SerializedProperty teleportationProvider;
         private SerializedProperty continuousMoveProvider;
+        private SerializedProperty snapTurnProvider;
         private SerializedProperty continuousTurnProvider;
         private SerializedProperty xrOrigin;
         private SerializedProperty uiRayInteractor;
@@ -30,8 +30,8 @@ namespace VRDrawing.Editor
             drawingBoardPrefab = serializedObject.FindProperty("drawingBoardPrefab");
             toolPanelPrefab = serializedObject.FindProperty("toolPanelPrefab");
             toggleToolPanelAction = serializedObject.FindProperty("toggleToolPanelAction");
-            teleportationProvider = serializedObject.FindProperty("teleportationProvider");
             continuousMoveProvider = serializedObject.FindProperty("continuousMoveProvider");
+            snapTurnProvider = serializedObject.FindProperty("snapTurnProvider");
             continuousTurnProvider = serializedObject.FindProperty("continuousTurnProvider");
             xrOrigin = serializedObject.FindProperty("xrOrigin");
             uiRayInteractor = serializedObject.FindProperty("uiRayInteractor");
@@ -130,8 +130,8 @@ namespace VRDrawing.Editor
             if (showLocomotionSettings)
             {
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(teleportationProvider);
                 EditorGUILayout.PropertyField(continuousMoveProvider);
+                EditorGUILayout.PropertyField(snapTurnProvider);
                 EditorGUILayout.PropertyField(continuousTurnProvider);
                 EditorGUILayout.PropertyField(xrOrigin);
 
@@ -229,13 +229,6 @@ namespace VRDrawing.Editor
 
         private void AutoFindLocomotion(DrawingModeManager manager)
         {
-            var teleport = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation.TeleportationProvider>();
-            if (teleport != null)
-            {
-                teleportationProvider.objectReferenceValue = teleport;
-                Debug.Log("✓ Found Teleportation Provider");
-            }
-
             var move = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>();
             if (move != null)
             {
@@ -243,10 +236,17 @@ namespace VRDrawing.Editor
                 Debug.Log("✓ Found Continuous Move Provider");
             }
 
-            var turn = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.ContinuousTurnProvider>();
-            if (turn != null)
+            var snapTurn = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.SnapTurnProvider>();
+            if (snapTurn != null)
             {
-                continuousTurnProvider.objectReferenceValue = turn;
+                snapTurnProvider.objectReferenceValue = snapTurn;
+                Debug.Log("✓ Found Snap Turn Provider");
+            }
+
+            var continuousTurn = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.ContinuousTurnProvider>();
+            if (continuousTurn != null)
+            {
+                continuousTurnProvider.objectReferenceValue = continuousTurn;
                 Debug.Log("✓ Found Continuous Turn Provider");
             }
 
@@ -336,19 +336,13 @@ namespace VRDrawing.Editor
                 }
             }
 
-            if (teleportationProvider.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ Teleportation Provider not assigned");
-                warnings++;
-            }
-
             if (continuousMoveProvider.objectReferenceValue == null)
             {
                 Debug.LogWarning("⚠ Continuous Move Provider not assigned");
                 warnings++;
             }
 
-            if (continuousTurnProvider.objectReferenceValue == null)
+            if (snapTurnProvider.objectReferenceValue == null && continuousTurnProvider.objectReferenceValue == null)
             {
                 Debug.LogWarning("⚠ Continuous Turn Provider not assigned");
                 warnings++;
@@ -397,8 +391,8 @@ namespace VRDrawing.Editor
             {
                 drawingBoardPrefab.objectReferenceValue = null;
                 toolPanelPrefab.objectReferenceValue = null;
-                teleportationProvider.objectReferenceValue = null;
                 continuousMoveProvider.objectReferenceValue = null;
+                snapTurnProvider.objectReferenceValue = null;
                 continuousTurnProvider.objectReferenceValue = null;
                 xrOrigin.objectReferenceValue = null;
                 uiRayInteractor.objectReferenceValue = null;

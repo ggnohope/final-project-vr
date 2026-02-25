@@ -4,7 +4,6 @@ using VRDrawing;
 public class DrawingBoardBridge : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private BoardPlacementController placementController;
     [SerializeField] private DrawingSurface drawingSurface;
 
     [Header("Auto Setup")]
@@ -12,38 +11,12 @@ public class DrawingBoardBridge : MonoBehaviour
 
     private void Awake()
     {
-        if (placementController == null)
-        {
-            placementController = GetComponent<BoardPlacementController>();
-        }
-
         if (drawingSurface == null)
         {
             drawingSurface = GetComponentInChildren<DrawingSurface>();
         }
-    }
 
-    private void OnEnable()
-    {
-        if (placementController != null)
-        {
-            placementController.OnBoardPlaced += OnBoardPlaced;
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (placementController != null)
-        {
-            placementController.OnBoardPlaced -= OnBoardPlaced;
-        }
-    }
-
-    private void OnBoardPlaced(GameObject board)
-    {
-        if (!autoSetupOnPlacement) return;
-
-        if (drawingSurface != null)
+        if (autoSetupOnPlacement && drawingSurface != null)
         {
             if (DrawingSystemManager.Instance != null)
             {

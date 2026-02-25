@@ -12,7 +12,6 @@ public class ItemSpawner : MonoBehaviour
     [Header("Item Prefabs")]
     [SerializeField] private GameObject compassPrefab;
     [SerializeField] private GameObject drawingBoardActivatorPrefab;
-    [SerializeField] private GameObject penPrefab;
     
     [Header("Spawn Settings")]
     [SerializeField] private Vector3 spawnOffset = new Vector3(0f, 0f, 0.3f);
@@ -60,6 +59,13 @@ public class ItemSpawner : MonoBehaviour
     
     public void SpawnItem(ItemType itemType)
     {
+        // Map item doesn't spawn anything, it just opens the map UI
+        if (itemType == ItemType.Map)
+        {
+            Debug.Log("[ItemSpawner] Map item selected - handled by MapItemHandler");
+            return;
+        }
+
         if (itemType == ItemType.DrawingBoard)
         {
             if (DrawingModeManager.Instance != null && DrawingModeManager.Instance.IsInDrawingMode)
@@ -114,8 +120,8 @@ public class ItemSpawner : MonoBehaviour
                 return compassPrefab;
             case ItemType.DrawingBoard:
                 return drawingBoardActivatorPrefab;
-            case ItemType.Pen:
-                return penPrefab;
+            case ItemType.Map:
+                return null;
             default:
                 return null;
         }

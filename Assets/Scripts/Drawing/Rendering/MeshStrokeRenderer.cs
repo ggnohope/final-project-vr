@@ -8,7 +8,6 @@ namespace VRDrawing.Rendering
     {
         [Header("Mesh Settings")]
         [SerializeField] private Material strokeMaterial;
-        [SerializeField] private int segmentsPerUnit = 100;
         [SerializeField] private bool smoothNormals = true;
 
         private DrawingSurface surface;
