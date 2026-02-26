@@ -114,13 +114,21 @@ namespace VRDrawing.Editor
                 Transform toolTip = prefab.transform.Find("ToolTip");
                 if (toolTip != null)
                 {
-                    so.FindProperty("toolTip").objectReferenceValue = toolTip;
+                    SerializedProperty toolTipProp = so.FindProperty("toolTip");
+                    if (toolTipProp != null)
+                    {
+                        toolTipProp.objectReferenceValue = toolTip;
+                    }
                 }
 
                 PenTool tool = prefab.GetComponent<PenTool>();
                 if (tool != null)
                 {
-                    so.FindProperty("drawingTool").objectReferenceValue = tool;
+                    SerializedProperty drawingToolProp = so.FindProperty("drawingTool");
+                    if (drawingToolProp != null)
+                    {
+                        drawingToolProp.objectReferenceValue = tool;
+                    }
                 }
 
                 so.ApplyModifiedProperties();

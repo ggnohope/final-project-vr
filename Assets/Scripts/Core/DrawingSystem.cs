@@ -17,7 +17,6 @@ public class DrawingSystem : MonoBehaviour
     [SerializeField] private LayerMask drawingSurfaceLayer;
     
     private List<PenController> registeredPens = new List<PenController>();
-    private List<BoardPlacementController> placedBoards = new List<BoardPlacementController>();
     private Dictionary<PenController, DrawingLine> activeLines = new Dictionary<PenController, DrawingLine>();
     private List<DrawingLine> allLines = new List<DrawingLine>();
     private Transform linesParent;
@@ -71,27 +70,8 @@ public class DrawingSystem : MonoBehaviour
         }
     }
     
-    public void RegisterBoard(BoardPlacementController board)
-    {
-        if (!placedBoards.Contains(board))
-        {
-            placedBoards.Add(board);
-        }
-    }
-    
-    public void UnregisterBoard(BoardPlacementController board)
-    {
-        placedBoards.Remove(board);
-    }
-    
     private void UpdateDrawing()
     {
-        if (placedBoards.Count == 0)
-        {
-            StopAllDrawing();
-            return;
-        }
-        
         foreach (PenController pen in registeredPens)
         {
             if (pen == null || !pen.IsHeld()) continue;
@@ -196,6 +176,6 @@ public class DrawingSystem : MonoBehaviour
     
     public bool CanDraw()
     {
-        return placedBoards.Count > 0;
+        return registeredPens.Count > 0;
     }
 }

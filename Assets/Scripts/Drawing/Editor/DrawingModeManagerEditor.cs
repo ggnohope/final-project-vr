@@ -274,7 +274,6 @@ namespace VRDrawing.Editor
             }
             else
             {
-                Debug.LogWarning("UI Ray Interactor not found in scene");
             }
 
             serializedObject.ApplyModifiedProperties();
@@ -286,7 +285,6 @@ namespace VRDrawing.Editor
             if (main != null)
             {
                 playerCamera.objectReferenceValue = main.transform;
-                Debug.Log("✓ Assigned Main Camera");
             }
 
             serializedObject.ApplyModifiedProperties();
@@ -294,7 +292,6 @@ namespace VRDrawing.Editor
 
         private void SetupYButtonInput()
         {
-            Debug.Log("Y Button input must be configured in your Input Actions asset");
             EditorUtility.DisplayDialog("Input Setup", 
                 "Please configure the Y Button input manually:\n\n" +
                 "1. Open your Input Actions asset\n" +
@@ -311,7 +308,6 @@ namespace VRDrawing.Editor
 
             if (drawingBoardPrefab.objectReferenceValue == null)
             {
-                Debug.LogWarning("✗ Drawing Board Prefab not assigned");
                 valid = false;
             }
 

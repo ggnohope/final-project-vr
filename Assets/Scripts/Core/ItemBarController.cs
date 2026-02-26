@@ -27,6 +27,10 @@ public class ItemBarController : MonoBehaviour
     [SerializeField] private XRRayInteractor uiRayInteractor;
     [SerializeField] private bool autoFindUIRay = true;
     
+    [Header("Map")]
+    [SerializeField] private GameObject worldMapCanvasObject;
+    private const string MapButtonLabel = "Map";
+    
     private XRInteractorLineVisual lineVisual;
     
     private bool isBarVisible = false;
@@ -121,9 +125,39 @@ public class ItemBarController : MonoBehaviour
             itemButtons.Add(button);
         }
         
+        CreateMapButton();
         UpdateButtonHighlights();
     }
     
+    private void CreateMapButton()
+    {
+        if (worldMapCanvasObject == null) return;
+
+        Button mapButton = Instantiate(itemButtonPrefab, itemButtonParent);
+        mapButton.name = "MapButton";
+        mapButton.GetComponentInChildren<Text>().text = MapButtonLabel;
+
+        ColorBlock colors = mapButton.colors;
+        colors.normalColor = new Color(0.2f, 0.5f, 0.9f);
+        colors.highlightedColor = new Color(0.3f, 0.6f, 1f);
+        colors.pressedColor = new Color(0.1f, 0.4f, 0.8f);
+        colors.selectedColor = new Color(0.2f, 0.5f, 0.9f);
+        mapButton.colors = colors;
+
+        mapButton.onClick.AddListener(OnMapButtonClicked);
+    }
+
+    /// <summary>Toggles the WorldMapCanvas visibility and hides the item bar.</summary>
+    public void OnMapButtonClicked()
+    {
+        if (worldMapCanvasObject == null) return;
+
+        bool mapCurrentlyActive = worldMapCanvasObject.activeSelf;
+        worldMapCanvasObject.SetActive(!mapCurrentlyActive);
+
+        HideBar();
+    }
+
     private void OnToggleBar(InputAction.CallbackContext context)
     {
         ToggleBar();

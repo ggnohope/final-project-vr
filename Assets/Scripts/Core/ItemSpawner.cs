@@ -80,7 +80,6 @@ public class ItemSpawner : MonoBehaviour
         GameObject prefab = GetPrefabForType(itemType);
         if (prefab == null)
         {
-            Debug.LogError($"ItemSpawner: No prefab for {itemType}");
             return;
         }
         
@@ -99,7 +98,6 @@ public class ItemSpawner : MonoBehaviour
             }
             else
             {
-                Debug.LogError("ItemSpawner: DrawingBoard missing DrawingBoardActivator component");
             }
         }
         

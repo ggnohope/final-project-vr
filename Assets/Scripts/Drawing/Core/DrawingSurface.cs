@@ -201,29 +201,21 @@ namespace VRDrawing
 
         private void HandleDrawToolStay(DrawingToolBase tool, Vector3 worldPos)
         {
-            Debug.Log($"[DrawingSurface] HandleDrawToolStay! worldPos={worldPos}, activeStrokes.Count={activeStrokes.Count}");
-            
             if (!activeStrokes.ContainsKey(tool))
             {
-                Debug.LogWarning($"[DrawingSurface] Tool {tool.name} not found in activeStrokes!");
                 return;
             }
 
             Stroke currentStroke = activeStrokes[tool];
             Vector2 uv = WorldToSurfaceUV(worldPos);
-            
-            Debug.Log($"[DrawingSurface] Current stroke has {currentStroke.points.Count} points, new UV={uv}");
 
             if (currentStroke.points.Count > 0)
             {
                 Vector2 lastUV = currentStroke.points[currentStroke.points.Count - 1].uv;
                 float distance = Vector2.Distance(lastUV, uv);
-                
-                Debug.Log($"[DrawingSurface] Distance from last point: {distance}, minPointDistance: {minPointDistance}");
 
                 if (distance < minPointDistance)
                 {
-                    Debug.LogWarning($"[DrawingSurface] Point too close, skipping! distance={distance} < min={minPointDistance}");
                     return;
                 }
             }

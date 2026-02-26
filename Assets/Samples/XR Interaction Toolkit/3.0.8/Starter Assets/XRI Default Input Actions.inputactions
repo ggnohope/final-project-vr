@@ -2013,7 +2013,7 @@
                 {
                     "name": "",
                     "id": "8f122fa1-7e2f-4000-8c91-1c4830cba839",
-                    "path": "<QuestTouchPlusController>{RightHand}/{TriggerButton}",
+                    "path": "<XRController>{RightHand}/{PrimaryButton}",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

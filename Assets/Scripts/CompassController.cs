@@ -36,7 +36,6 @@ public class CompassController : MonoBehaviour
         
         if (grabInteractable == null)
         {
-            Debug.LogError($"CompassController: XRGrabInteractable component not found on {gameObject.name}!");
         }
         
         // Find needle transform if not assigned
@@ -50,7 +49,6 @@ public class CompassController : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"CompassController: Needle Transform not assigned and no child named 'Needle' found on {gameObject.name}. Needle rotation will not work.");
             }
         }
     }

@@ -98,7 +98,7 @@ namespace VRDrawing.Data
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to parse DrawingData from JSON: {e.Message}");
+                _ = e;
                 return new DrawingData();
             }
         }
@@ -113,7 +113,7 @@ namespace VRDrawing.Data
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to save DrawingData to {filePath}: {e.Message}");
+                _ = e;
                 return false;
             }
         }
@@ -124,7 +124,6 @@ namespace VRDrawing.Data
             {
                 if (!File.Exists(filePath))
                 {
-                    Debug.LogWarning($"File not found: {filePath}");
                     return new DrawingData();
                 }
 
@@ -133,7 +132,7 @@ namespace VRDrawing.Data
             }
             catch (System.Exception e)
             {
-                Debug.LogError($"Failed to load DrawingData from {filePath}: {e.Message}");
+                _ = e;
                 return new DrawingData();
             }
         }
