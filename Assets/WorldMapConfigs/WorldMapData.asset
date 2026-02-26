@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 07e1f9f4dd1c11f488d9a205a7b08202, type: 3}
+  m_Script: {fileID: 11500000, guid: 0a2b3d2aad5dc7848983aec9bad1c938, type: 3}
   m_Name: WorldMapData
   m_EditorClassIdentifier: Assembly-CSharp::Core.SceneMapData
   worldMapTexture: {fileID: 2800000, guid: a511c57b3b4c6234f94eedbaaf1a935b, type: 3}
@@ -25,9 +25,9 @@ MonoBehaviour:
     plyAssetPath: GsplatScenes/horse
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 1}
+      rotation: {x: 0, y: 0, z: 0, w: 0}
       fieldOfView: 60
-    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 0.40392157}
+    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   - regionId: region_1
     displayName: robot
     uvBounds:
@@ -39,9 +39,9 @@ MonoBehaviour:
     plyAssetPath: GsplatScenes/robot
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 1}
-      fieldOfView: 60
-    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 0.38431373}
+      rotation: {x: 0, y: 0, z: 0, w: 0}
+      fieldOfView: 0
+    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   transitionFadeTime: 0.5
   minimumLoadTime: 1
   fadeCurve:

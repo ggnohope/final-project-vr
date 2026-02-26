@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Core
@@ -15,72 +14,53 @@ namespace Core
     [Serializable]
     public struct MapRegion
     {
-        /// <summary>Unique identifier matching the MapHotspot's regionId.</summary>
         public string regionId;
-
-        /// <summary>Human-readable name shown in the tooltip.</summary>
         public string displayName;
-
-        /// <summary>Resources-relative path to the GsplatAsset (.ply).</summary>
+        public Rect uvBounds;
         public string plyAssetPath;
-
-        /// <summary>Normalized UV rect (0–1) defining the clickable area on the map texture.</summary>
-        public Rect bounds;
-
-        /// <summary>Camera transform and FOV to apply when this region is loaded.</summary>
         public CameraConfig cameraConfig;
+        public Color regionHighlightColor;
     }
 
-    /// <summary>
-    /// ScriptableObject holding world map configuration: texture and all region definitions.
-    /// Create via Assets > Create > World Map > Scene Map Data.
-    /// Assign to WorldMapController and MapHotspotNavigator in the Inspector.
-    /// </summary>
-    [CreateAssetMenu(fileName = "WorldMapData", menuName = "World Map/Scene Map Data")]
+    [CreateAssetMenu(fileName = "SceneMapData", menuName = "World Map/Scene Map Data", order = 1)]
     public class SceneMapData : ScriptableObject
     {
-        [Header("Map Texture")]
+        [Header("World Map Settings")]
         public Texture2D worldMapTexture;
+        
+        [Header("Region Definitions")]
+        public MapRegion[] regions;
 
-        [Header("Regions")]
-        [SerializeField] private List<MapRegion> regions = new List<MapRegion>();
+        [Header("Transition Settings")]
+        public float transitionFadeTime = 0.5f;
+        public float minimumLoadTime = 1.0f;
+        public AnimationCurve fadeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-        /// <summary>Read-only access to all defined regions.</summary>
-        public IReadOnlyList<MapRegion> Regions => regions;
+        [Header("Loading Screen")]
+        public Sprite loadingScreenOverlay;
+        public string loadingTextFormat = "Loading {0}...";
 
-        /// <summary>
-        /// Returns the first region whose normalized UV bounds contain the given position.
-        /// Returns null if no region matches.
-        /// </summary>
         public MapRegion? GetRegionByPosition(Vector2 normalizedPosition)
         {
-            foreach (MapRegion region in regions)
+            foreach (var region in regions)
             {
-                if (region.bounds.Contains(normalizedPosition))
+                if (region.uvBounds.Contains(normalizedPosition))
                 {
                     return region;
                 }
             }
-
             return null;
         }
 
-        /// <summary>Returns the region matching the given regionId, or null if not found.</summary>
         public MapRegion? GetRegionById(string regionId)
         {
-            if (string.IsNullOrEmpty(regionId))
+            foreach (var region in regions)
             {
-                return null;
-            }
-
-            foreach (MapRegion region in regions)
-            {
-                if (string.Equals(region.regionId, regionId, StringComparison.Ordinal))
+                if (region.regionId == regionId)
                 {
                     return region;
                 }
             }
-
             return null;
         }
     }
