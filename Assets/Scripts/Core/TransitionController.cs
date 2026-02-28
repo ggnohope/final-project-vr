@@ -22,6 +22,14 @@ namespace Core
         [SerializeField] private GsplatSceneLoader sceneLoader;
         [SerializeField] private SceneMapData sceneMapData;
 
+        [Header("VR Canvas Positioning")]
+        [Tooltip("The TransitionCanvas transform to position in front of the camera each frame.")]
+        [SerializeField] private Transform transitionCanvasTransform;
+        [Tooltip("Camera used to anchor the transition canvas. Assigned automatically from Camera.main if left empty.")]
+        [SerializeField] private Camera vrCamera;
+        [Tooltip("Distance in meters in front of the camera at which the canvas is placed.")]
+        [SerializeField] private float canvasDistance = 0.5f;
+
         private float TransitionFadeTime => sceneMapData != null ? sceneMapData.transitionFadeTime : 0.5f;
         private float MinimumLoadTime => sceneMapData != null ? sceneMapData.minimumLoadTime : 0.5f;
         private AnimationCurve FadeCurve => sceneMapData != null ? sceneMapData.fadeCurve : AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
@@ -32,6 +40,11 @@ namespace Core
 
         private void Awake()
         {
+            if (vrCamera == null)
+            {
+                vrCamera = Camera.main;
+            }
+
             if (fadeImage != null)
             {
                 fadeImage.color = fadeColor;
@@ -66,10 +79,28 @@ namespace Core
 
         private void Update()
         {
-            if (isTransitioning && loadingSpinner != null && loadingSpinner.gameObject.activeSelf)
+            if (isTransitioning)
             {
-                loadingSpinner.transform.Rotate(0, 0, -spinnerRotationSpeed * Time.deltaTime);
+                PositionCanvasInFrontOfCamera();
+
+                if (loadingSpinner != null && loadingSpinner.gameObject.activeSelf)
+                {
+                    loadingSpinner.transform.Rotate(0, 0, -spinnerRotationSpeed * Time.deltaTime);
+                }
             }
+        }
+
+        /// <summary>Keeps the world-space TransitionCanvas locked in front of the VR camera.</summary>
+        private void PositionCanvasInFrontOfCamera()
+        {
+            if (transitionCanvasTransform == null || vrCamera == null)
+            {
+                return;
+            }
+
+            Transform cam = vrCamera.transform;
+            transitionCanvasTransform.position = cam.position + cam.forward * canvasDistance;
+            transitionCanvasTransform.rotation = cam.rotation;
         }
 
         private void OnSceneLoadStarted(string regionId)
@@ -98,6 +129,8 @@ namespace Core
         private IEnumerator TransitionCoroutine(string regionName)
         {
             isTransitioning = true;
+
+            PositionCanvasInFrontOfCamera();
 
             if (fadeCanvasGroup != null)
             {
@@ -209,6 +242,8 @@ namespace Core
         private IEnumerator ShowTransitionCoroutine()
         {
             isTransitioning = true;
+
+            PositionCanvasInFrontOfCamera();
 
             if (fadeCanvasGroup != null)
             {

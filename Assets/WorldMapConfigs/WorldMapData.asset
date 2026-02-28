@@ -25,7 +25,7 @@ MonoBehaviour:
     plyAssetPath: GsplatScenes/horse
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
       fieldOfView: 60
     regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   - regionId: region_1
@@ -39,7 +39,7 @@ MonoBehaviour:
     plyAssetPath: GsplatScenes/robot
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
       fieldOfView: 0
     regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   transitionFadeTime: 0.5

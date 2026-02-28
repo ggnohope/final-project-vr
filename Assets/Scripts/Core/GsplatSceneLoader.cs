@@ -82,6 +82,11 @@ namespace Core
 
         private IEnumerator UnloadCurrentSceneCoroutine()
         {
+            if (gsplatRenderer != null && gsplatRenderer.GsplatAsset != null)
+            {
+                gsplatRenderer.GsplatAsset = null;
+            }
+
             if (currentAsset != null)
             {
                 string previousSceneId = CurrentSceneId;
@@ -110,6 +115,11 @@ namespace Core
                 }
 
                 OnSceneUnloaded?.Invoke(previousSceneId);
+            }
+
+            else
+            {
+                yield return new WaitForEndOfFrame();
             }
         }
 
