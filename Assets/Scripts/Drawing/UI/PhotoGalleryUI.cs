@@ -187,10 +187,14 @@ namespace VRDrawing.UI
             if (thumbnail != null)
             {
                 thumbnail.texture = photo;
+
+                // RawImage uses stretch anchors (0,0)-(1,1) in the prefab, so sizeDelta must
+                // remain zero to fill the GridLayoutGroup cell correctly. Setting a non-zero
+                // sizeDelta would make the image larger than its cell, causing overlap.
                 RectTransform rt = thumbnail.GetComponent<RectTransform>();
                 if (rt != null)
                 {
-                    rt.sizeDelta = thumbnailSize;
+                    rt.sizeDelta = Vector2.zero;
                 }
             }
 

@@ -1,0 +1,5 @@
+D:/unity projects/VRTutorialXRInteractionToolkit3x/.utmp/RelWithDebInfo/1j1s1f48/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/unity projects/VRTutorialXRInteractionToolkit3x/.utmp/RelWithDebInfo/1j1s1f48/arm64-v8a/CMakeFiles/rebuild_cache.dir
+D:/unity projects/VRTutorialXRInteractionToolkit3x/.utmp/RelWithDebInfo/1j1s1f48/arm64-v8a/GameActivity/CMakeFiles/game.dir
+D:/unity projects/VRTutorialXRInteractionToolkit3x/.utmp/RelWithDebInfo/1j1s1f48/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+D:/unity projects/VRTutorialXRInteractionToolkit3x/.utmp/RelWithDebInfo/1j1s1f48/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir

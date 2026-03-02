@@ -134,10 +134,13 @@ namespace Core
 
             if (request.asset == null)
             {
+                Debug.LogError($"[GsplatSceneLoader] GsplatAsset not found at Resources path: {plyPath}");
                 yield break;
             }
 
             currentAsset = request.asset as GsplatAsset;
+
+            CapSHBandsForPlatform(currentAsset);
 
             if (gsplatRenderer != null)
             {
@@ -145,6 +148,45 @@ namespace Core
             }
 
             yield return new WaitForEndOfFrame();
+        }
+
+        /// <summary>
+        /// Caps SHBands on the asset to the highest value whose GPU buffer fits within the platform's
+        /// maximum GraphicsBuffer size. On Meta Quest (Adreno GPU) the limit is 128 MB.
+        /// This modifies the runtime instance only — the serialized asset on disk is unaffected.
+        /// </summary>
+        private void CapSHBandsForPlatform(GsplatAsset asset)
+        {
+            if (asset == null || asset.SHBands == 0)
+                return;
+
+#if !UNITY_EDITOR
+            // SH coefficient counts per band level (excluding DC term, stored as Vector3 per splat)
+            // Band 1: 3 coeffs, Band 2: 8 coeffs, Band 3: 15 coeffs
+            const long maxBufferBytes = 134_217_728L; // 128 MB — Adreno GPU limit on Meta Quest
+            const int bytesPerCoefficient = 12;       // sizeof(Vector3)
+            int[] coefficientsPerBand = { 0, 3, 8, 15 };
+
+            byte originalBands = asset.SHBands;
+            byte safeBands = 0;
+
+            for (byte bands = asset.SHBands; bands > 0; bands--)
+            {
+                long shBufferSize = (long)coefficientsPerBand[bands] * bytesPerCoefficient * asset.SplatCount;
+                if (shBufferSize <= maxBufferBytes)
+                {
+                    safeBands = bands;
+                    break;
+                }
+            }
+
+            if (safeBands < originalBands)
+            {
+                asset.SHBands = safeBands;
+                Debug.LogWarning($"[GsplatSceneLoader] '{asset.name}' has {asset.SplatCount} splats. " +
+                                 $"SHBands capped {originalBands} → {safeBands} to stay within 128MB GPU buffer limit.");
+            }
+#endif
         }
 
         private void ApplyCameraConfiguration(CameraConfig config)

@@ -36,6 +36,7 @@ namespace VRDrawing.Rendering
             {
                 strokeMaterial = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 strokeMaterial.color = Color.white;
+                strokeMaterial.enableInstancing = true;
             }
 
             meshRenderer.material = strokeMaterial;

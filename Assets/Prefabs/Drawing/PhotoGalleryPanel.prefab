@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: -3397071470931237846}
   - component: {fileID: -3777251635715524021}
   - component: {fileID: 2890820421801192182}
+  - component: {fileID: 5600696023484745122}
   m_Layer: 5
   m_Name: PhotoGalleryPanel
   m_TagString: Untagged
@@ -170,6 +171,21 @@ MonoBehaviour:
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
   m_PresetInfoIsWorld: 1
+--- !u!114 &5600696023484745122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070130382548936765}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5abc3d330181304a82901f24c5a4f09, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.UI.GalleryScrollController
+  scrollRect: {fileID: 820998687326013230}
+  scrollSpeed: 600
+  deadzone: 0.15
 --- !u!1 &2181054414353300096
 GameObject:
   m_ObjectHideFlags: 0
@@ -745,6 +761,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1324,6 +1341,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -1406,10 +1424,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GridLayoutGroup
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 10
+    m_Right: 10
+    m_Top: 10
+    m_Bottom: 10
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
