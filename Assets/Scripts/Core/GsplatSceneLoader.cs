@@ -144,7 +144,13 @@ namespace Core
 
             if (gsplatRenderer != null)
             {
+                // Disable → assign asset → re-enable so that OnEnable() initializes
+                // m_renderer with the asset already set. This prevents a race condition
+                // where URP's render graph accesses SorterResource before Update() has
+                // had a chance to create m_renderer, causing a NullReferenceException.
+                gsplatRenderer.enabled = false;
                 gsplatRenderer.GsplatAsset = currentAsset;
+                gsplatRenderer.enabled = true;
             }
 
             yield return new WaitForEndOfFrame();
