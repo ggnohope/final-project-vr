@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 namespace Core
 {
@@ -16,13 +17,17 @@ namespace Core
     /// - Optional camera focus on selected hotspot
     /// - Optional tooltip display
     /// - Wrapping navigation (last to first)
+    /// - Auto-generation of hotspots from SceneMapData at runtime
     /// 
-    /// SETUP:
-    /// 1. Use Tools > World Map > Hotspot Setup Helper to generate hotspots
-    /// 2. Add this component to scene
-    /// 3. Assign Input Actions (joystick move, confirm button)
-    /// 4. Assign references (WorldMapController, SceneMapData)
-    /// 5. Populate hotspots array with all MapHotspot GameObjects
+    /// SETUP (Auto-generate mode):
+    /// 1. Enable autoGenerateFromData
+    /// 2. Assign hotspotPrefab (MapHotspotPrefab)
+    /// 3. Assign hotspotsContainer (RegionHotspots RectTransform)
+    /// 4. Assign SceneMapData — hotspots will be created automatically from regions[]
+    /// 
+    /// SETUP (Manual mode):
+    /// 1. Disable autoGenerateFromData
+    /// 2. Populate hotspots array with all MapHotspot GameObjects
     /// 
     /// NAVIGATION:
     /// - Joystick Right → Next hotspot
@@ -45,6 +50,13 @@ namespace Core
         [Header("References")]
         [SerializeField] private WorldMapController worldMapController;
         [SerializeField] private SceneMapData sceneMapData;
+
+        [Header("Auto Generation")]
+        [SerializeField] private bool autoGenerateFromData = false;
+        [SerializeField] private GameObject hotspotPrefab;
+        [SerializeField] private RectTransform hotspotsContainer;
+
+        [Tooltip("Only used in manual mode (Auto Generate From Data = false). Assign MapHotspot GameObjects here.")]
         [SerializeField] private MapHotspot[] hotspots;
 
         [Header("Navigation Settings")]
@@ -100,12 +112,98 @@ namespace Core
 
         private void Start()
         {
+            if (autoGenerateFromData)
+            {
+                // Wait one frame so the Canvas layout system has sized the container correctly
+                StartCoroutine(GenerateHotspotsNextFrame());
+            }
+            else
+            {
+                InitializeHotspots();
+
+                if (enabled)
+                {
+                    SelectHotspot(currentHotspotIndex, immediate: true);
+                }
+            }
+        }
+
+        private IEnumerator GenerateHotspotsNextFrame()
+        {
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            GenerateHotspotsFromData();
             InitializeHotspots();
-            
+
             if (enabled)
             {
                 SelectHotspot(currentHotspotIndex, immediate: true);
             }
+        }
+
+        /// <summary>
+        /// Destroys all existing generated hotspots and recreates them from SceneMapData.regions.
+        /// Each region's uvBounds.center is mapped to an anchoredPosition inside hotspotsContainer.
+        /// Call this at runtime if SceneMapData changes.
+        /// </summary>
+        public void GenerateHotspotsFromData()
+        {
+            if (sceneMapData == null || hotspotPrefab == null || hotspotsContainer == null)
+            {
+                Debug.LogWarning("[MapHotspotNavigator] Cannot generate hotspots: sceneMapData, hotspotPrefab or hotspotsContainer is not assigned.");
+                return;
+            }
+
+            // Clear previously generated children
+            for (int i = hotspotsContainer.childCount - 1; i >= 0; i--)
+            {
+                Destroy(hotspotsContainer.GetChild(i).gameObject);
+            }
+
+            Rect containerRect = hotspotsContainer.rect;
+            var generated = new List<MapHotspot>();
+
+            foreach (var region in sceneMapData.regions)
+            {
+                GameObject instanceGO = Instantiate(hotspotPrefab, hotspotsContainer);
+                instanceGO.name = $"Hotspot_{region.regionId}";
+
+                MapHotspot instance = instanceGO.GetComponent<MapHotspot>();
+                if (instance == null)
+                {
+                    instance = instanceGO.GetComponentInChildren<MapHotspot>();
+                }
+
+                if (instance == null)
+                {
+                    Debug.LogWarning($"[MapHotspotNavigator] hotspotPrefab has no MapHotspot component. Skipping region '{region.regionId}'.");
+                    Destroy(instanceGO);
+                    continue;
+                }
+
+                instance.Initialize(region.regionId, generated.Count);
+                instance.SetNavigator(this);
+
+                // Set highlight color from region data
+                Image highlightImage = instance.GetComponent<Image>();
+                if (highlightImage != null)
+                {
+                    highlightImage.color = region.regionHighlightColor;
+                }
+
+                // Convert UV center [0,1] to anchoredPosition relative to container center
+                Vector2 uvCenter = region.uvBounds.center;
+                RectTransform rt = instance.GetComponent<RectTransform>();
+                rt.anchoredPosition = new Vector2(
+                    (uvCenter.x - 0.5f) * containerRect.width,
+                    (uvCenter.y - 0.5f) * containerRect.height
+                );
+
+                generated.Add(instance);
+            }
+
+            hotspots = generated.ToArray();
+            Debug.Log($"[MapHotspotNavigator] Auto-generated {hotspots.Length} hotspots from SceneMapData.");
         }
 
         private void Update()
@@ -127,6 +225,7 @@ namespace Core
                 if (hotspots[i] != null)
                 {
                     hotspots[i].Initialize(hotspots[i].RegionId, i);
+                    hotspots[i].SetNavigator(this);
                     regionToIndexMap[hotspots[i].RegionId] = i;
                 }
             }
@@ -343,6 +442,13 @@ namespace Core
             {
                 SelectHotspot(index);
             }
+        }
+
+        /// <summary>Selects the hotspot at the given index then immediately confirms (loads the region). Used by MapHotspot click handler.</summary>
+        public void SelectAndConfirmHotspot(int index)
+        {
+            SelectHotspot(index);
+            ConfirmSelection();
         }
 
         public void ResetToFirstHotspot()

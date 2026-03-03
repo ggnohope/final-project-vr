@@ -60,6 +60,13 @@ public class ItemBarController : MonoBehaviour
         }
         
         barPanel.SetActive(false);
+
+        // Ensure map starts hidden regardless of prefab state
+        if (worldMapCanvasObject != null)
+        {
+            worldMapCanvasObject.SetActive(false);
+        }
+
         CreateItemButtons();
         
         if (autoFindUIRay && uiRayInteractor == null)
@@ -156,6 +163,18 @@ public class ItemBarController : MonoBehaviour
         worldMapCanvasObject.SetActive(!mapCurrentlyActive);
 
         HideBar();
+
+        // Keep UI Ray enabled when map is open so hotspots can be clicked
+        if (!mapCurrentlyActive)
+        {
+            UpdateUIRayVisibility(true);
+        }
+    }
+
+    /// <summary>Disables the UI Ray Interactor. Called externally when the map closes after a region is loaded.</summary>
+    public void DisableUIRay()
+    {
+        UpdateUIRayVisibility(false);
     }
 
     private void OnToggleBar(InputAction.CallbackContext context)

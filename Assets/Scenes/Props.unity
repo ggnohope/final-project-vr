@@ -10206,19 +10206,6 @@ MonoBehaviour:
   photoDefaultWidth: 0.2
   photoOffsetFromSurface: 0.001
   photoMaterial: {fileID: 0}
-  uiRayInteractor: {fileID: 696807387}
-  placePhotoAction:
-    m_UseReference: 0
-    m_Action:
-      m_Name: Place Photo
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 1119304e-81b3-489e-ac05-676ff6869352
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
 --- !u!4 &1316155325
 Transform:
   m_ObjectHideFlags: 0
@@ -18607,7 +18594,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5468304939494594275, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 20
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5468304939494594275, guid: eddc69fa318fe1446ae1744ee20bc443, type: 3}
       propertyPath: m_AnchoredPosition.y

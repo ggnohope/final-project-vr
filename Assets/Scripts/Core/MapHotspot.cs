@@ -1,10 +1,11 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace Core
 {
-    public class MapHotspot : MonoBehaviour
+    public class MapHotspot : MonoBehaviour, IPointerClickHandler
     {
         [Header("Region Data")]
         [SerializeField] private string regionId;
@@ -28,6 +29,7 @@ namespace Core
         private Vector3 originalScale;
         private bool isActive = false;
         private Coroutine pulseCoroutine;
+        private MapHotspotNavigator navigator;
 
         private void Awake()
         {
@@ -175,6 +177,18 @@ namespace Core
         {
             regionId = id;
             hotspotIndex = index;
+        }
+
+        /// <summary>Assigns the navigator so clicking this hotspot directly selects and confirms it.</summary>
+        public void SetNavigator(MapHotspotNavigator nav)
+        {
+            navigator = nav;
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (navigator == null) return;
+            navigator.SelectAndConfirmHotspot(hotspotIndex);
         }
 
         public string RegionId => regionId;

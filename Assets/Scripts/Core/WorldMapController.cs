@@ -107,6 +107,12 @@ namespace Core
                 worldMapCanvas.gameObject.SetActive(false);
             }
 
+            // Disable UI Ray now that the map is closed
+            if (ItemBarController.Instance != null)
+            {
+                ItemBarController.Instance.DisableUIRay();
+            }
+
             sceneLoader.LoadScene(region.regionId, region.plyAssetPath, region.cameraConfig);
         }
 
