@@ -6413,6 +6413,10 @@ PrefabInstance:
       propertyPath: zoomAction.m_Action.m_Name
       value: Zoom
       objectReference: {fileID: 0}
+    - target: {fileID: 1968135325556139470, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3336791479661195807, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       propertyPath: m_Name
       value: WorldMapCanvas
