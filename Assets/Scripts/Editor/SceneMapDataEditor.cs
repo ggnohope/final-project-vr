@@ -100,7 +100,7 @@ namespace Editor
 
                 EditorGUILayout.PropertyField(regionIdProp, new GUIContent("Region Id"));
                 EditorGUILayout.PropertyField(displayNameProp, new GUIContent("Display Name"));
-                EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("uvBounds"), new GUIContent("UV Bounds"));
+                EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("latLng"), new GUIContent("Lat / Lng", "Province centroid. x = latitude (N), y = longitude (E). Decimal degrees WGS84."));
                 EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("plyAssetPath"), new GUIContent("Ply Asset Path"));
 
                 var cameraProp = regionProp.FindPropertyRelative("cameraConfig");
@@ -124,105 +124,19 @@ namespace Editor
             EditorGUILayout.Space(2);
         }
 
-        /// <summary>Draw the map preview with region UV bounds overlaid.</summary>
+        /// <summary>Draw the map preview — shows lat/lng reference info since the static texture is no longer used.</summary>
         private void DrawMapPreview(SceneMapData mapData)
         {
-            EditorGUILayout.LabelField("Map Preview", EditorStyles.boldLabel);
-
-            if (mapData.worldMapTexture == null)
-            {
-                EditorGUILayout.HelpBox("Assign a World Map Texture to see the preview.", MessageType.Info);
-                return;
-            }
-
-            // Reserve a fixed-height rect for the map
-            Rect previewRect = GUILayoutUtility.GetRect(
-                GUILayoutUtility.GetLastRect().width,
-                MapPreviewHeight,
-                GUILayout.ExpandWidth(true)
-            );
-
-            // Draw checkerboard background
-            EditorGUI.DrawTextureTransparent(previewRect, Texture2D.grayTexture);
-            // Draw texture fitted inside rect (maintain aspect)
-            Rect texRect = FitRectInside(previewRect, mapData.worldMapTexture.width, mapData.worldMapTexture.height);
-            GUI.DrawTexture(texRect, mapData.worldMapTexture, ScaleMode.ScaleToFit, true);
-
-            // Overlay region UV bounds
-            if (mapData.regions != null)
-            {
-                foreach (var region in mapData.regions)
-                {
-                    DrawRegionOverlay(texRect, region);
-                }
-            }
-
+            EditorGUILayout.LabelField("Lat / Lng Reference — Vietnam", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "Preview shows the world map with region bounds overlaid. UV coordinates are normalized (0-1). Origin is bottom-left.",
-                MessageType.None
+                "The static world map texture is no longer used.\n" +
+                "Tiles are fetched from Mapbox at runtime.\n\n" +
+                "Vietnam bounding box (approximate):\n" +
+                "  Latitude:  8.18° N  →  23.39° N\n" +
+                "  Longitude: 102.14° E  →  109.46° E\n\n" +
+                "Enter province centroid coordinates in each region's Lat / Lng field.",
+                MessageType.Info
             );
-        }
-
-        /// <summary>Draw a colored rectangle overlay for a region's UV bounds.</summary>
-        private void DrawRegionOverlay(Rect texRect, MapRegion region)
-        {
-            // UV origin is bottom-left; GUI origin is top-left — flip Y
-            float x = texRect.x + region.uvBounds.x * texRect.width;
-            float y = texRect.y + (1f - region.uvBounds.y - region.uvBounds.height) * texRect.height;
-            float w = region.uvBounds.width * texRect.width;
-            float h = region.uvBounds.height * texRect.height;
-
-            Rect guiRect = new Rect(x, y, w, h);
-
-            Color fillColor = region.regionHighlightColor;
-            fillColor.a = 0.25f;
-            EditorGUI.DrawRect(guiRect, fillColor);
-
-            // Border
-            Color borderColor = region.regionHighlightColor;
-            borderColor.a = 0.85f;
-            DrawRectBorder(guiRect, borderColor, 2f);
-
-            // Label
-            GUIStyle labelStyle = new GUIStyle(EditorStyles.miniLabel)
-            {
-                normal = { textColor = Color.white },
-                alignment = TextAnchor.UpperLeft,
-                fontStyle = FontStyle.Bold
-            };
-
-            string label = string.IsNullOrEmpty(region.displayName) ? region.regionId : region.displayName;
-            GUI.Label(new Rect(x + 3, y + 2, w - 4, 16), label, labelStyle);
-        }
-
-        private static void DrawRectBorder(Rect rect, Color color, float thickness)
-        {
-            EditorGUI.DrawRect(new Rect(rect.x, rect.y, rect.width, thickness), color);
-            EditorGUI.DrawRect(new Rect(rect.x, rect.yMax - thickness, rect.width, thickness), color);
-            EditorGUI.DrawRect(new Rect(rect.x, rect.y, thickness, rect.height), color);
-            EditorGUI.DrawRect(new Rect(rect.xMax - thickness, rect.y, thickness, rect.height), color);
-        }
-
-        private static Rect FitRectInside(Rect container, float texW, float texH)
-        {
-            float texAspect = texW / texH;
-            float containerAspect = container.width / container.height;
-
-            float w, h;
-            if (texAspect > containerAspect)
-            {
-                w = container.width;
-                h = w / texAspect;
-            }
-            else
-            {
-                h = container.height;
-                w = h * texAspect;
-            }
-
-            float offsetX = container.x + (container.width - w) * 0.5f;
-            float offsetY = container.y + (container.height - h) * 0.5f;
-            return new Rect(offsetX, offsetY, w, h);
         }
 
         private void AddNewRegion(SceneMapData mapData)
@@ -235,13 +149,14 @@ namespace Editor
             if (mapData.regions != null)
                 System.Array.Copy(mapData.regions, newRegions, newIndex);
 
+            // Default centroid: center of Vietnam
             newRegions[newIndex] = new MapRegion
             {
-                regionId = $"region_{newIndex}",
-                displayName = string.Empty,
-                uvBounds = new Rect(0.5f, 0.5f, 0.1f, 0.1f),
-                plyAssetPath = string.Empty,
-                cameraConfig = new CameraConfig { fieldOfView = 60f },
+                regionId        = $"region_{newIndex}",
+                displayName     = string.Empty,
+                latLng          = new Vector2(16.0f, 106.5f),
+                plyAssetPath    = string.Empty,
+                cameraConfig    = new CameraConfig { fieldOfView = 60f },
                 regionHighlightColor = Color.yellow
             };
 

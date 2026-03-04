@@ -5,7 +5,13 @@ using UnityEngine.UI;
 
 namespace Core
 {
-    public class MapHotspot : MonoBehaviour, IPointerClickHandler
+    /// <summary>
+    /// Represents a single map hotspot on the world map canvas.
+    /// Interaction model:
+    ///   - UI Ray hover (PointerEnter/Exit) → highlight on/off
+    ///   - UI Ray click (trigger press while hovering) → select and load region
+    /// </summary>
+    public class MapHotspot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
     {
         [Header("Region Data")]
         [SerializeField] private string regionId;
@@ -183,6 +189,16 @@ namespace Core
         public void SetNavigator(MapHotspotNavigator nav)
         {
             navigator = nav;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            SetActive(true);
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            SetActive(false);
         }
 
         public void OnPointerClick(PointerEventData eventData)

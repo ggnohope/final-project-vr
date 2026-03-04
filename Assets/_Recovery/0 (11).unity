@@ -6264,8 +6264,7 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 4562999123531600352, guid: f4c896094b4184845b0ec20a354f6baf, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 3843908769789772077, guid: f4c896094b4184845b0ec20a354f6baf, type: 3}
@@ -6396,7 +6395,7 @@ PrefabInstance:
     - target: {fileID: 1044896084460571069, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       propertyPath: zoomAction.m_Reference
       value: 
-      objectReference: {fileID: -8525429354371678379, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+      objectReference: {fileID: -6493913391331992944, guid: c348712bda248c246b8c49b3db54643f, type: 3}
     - target: {fileID: 1044896084460571069, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       propertyPath: panAction.m_UseReference
       value: 1
@@ -6541,10 +6540,6 @@ PrefabInstance:
       propertyPath: logCacheHits
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 8270278203498113397, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
-      propertyPath: logRequests
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8608071885316681784, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       propertyPath: m_PresetInfoIsWorld
       value: 1
@@ -6558,12 +6553,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3336791479661195807, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       insertIndex: -1
       addedObject: {fileID: 793521960}
-    - targetCorrespondingSourceObject: {fileID: 3336791479661195807, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 793521966}
-    - targetCorrespondingSourceObject: {fileID: 3336791479661195807, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 793521967}
     - targetCorrespondingSourceObject: {fileID: 5069679442446092415, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       insertIndex: -1
       addedObject: {fileID: 434371135}
@@ -6603,45 +6592,6 @@ MonoBehaviour:
   moveLocomotionObject: {fileID: 1591481664}
   distanceFromPlayer: 2
   positionOffset: {x: 0, y: 0, z: 0}
---- !u!223 &793521964 stripped
-Canvas:
-  m_CorrespondingSourceObject: {fileID: 6768760215191398309, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
-  m_PrefabInstance: {fileID: 793521957}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &793521966
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 793521959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dcdca4789e6bfd249b243e2b8c1fddf7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Core.MapUIRaycastDiagnostics
-  mapCanvas: {fileID: 793521964}
-  uiRayInteractor: {fileID: 696807387}
-  hotspotsContainer: {fileID: 2064262116}
---- !u!114 &793521967
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 793521959}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7951c64acb0fa62458bf30a60089fe2d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.UI.TrackedDeviceGraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_CheckFor2DOcclusion: 0
-  m_CheckFor3DOcclusion: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_RaycastTriggerInteraction: 1
 --- !u!1001 &795926606
 PrefabInstance:
   m_ObjectHideFlags: 0

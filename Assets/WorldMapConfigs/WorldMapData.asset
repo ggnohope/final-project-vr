@@ -16,12 +16,7 @@ MonoBehaviour:
   regions:
   - regionId: region_0
     displayName: horse
-    uvBounds:
-      serializedVersion: 2
-      x: 0.15
-      y: 0.25
-      width: 0.12
-      height: 0.2
+    latLng: {x: 21.028, y: 105.854}
     plyAssetPath: GsplatScenes/horse
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
@@ -30,12 +25,7 @@ MonoBehaviour:
     regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   - regionId: region_1
     displayName: robot
-    uvBounds:
-      serializedVersion: 2
-      x: 0.45
-      y: 0.5
-      width: 0.12
-      height: 0.2
+    latLng: {x: 10.776, y: 106.701}
     plyAssetPath: GsplatScenes/robot
     cameraConfig:
       position: {x: 0, y: 0, z: 0}

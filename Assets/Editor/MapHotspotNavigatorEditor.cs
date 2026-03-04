@@ -21,6 +21,7 @@ namespace Core.Editor
             EditorGUILayout.LabelField("References", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("worldMapController"));
             EditorGUILayout.PropertyField(serializedObject.FindProperty("sceneMapData"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("tileRenderer"));
 
             EditorGUILayout.Space();
 

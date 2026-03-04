@@ -224,7 +224,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &803515401312226638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -311,6 +311,8 @@ GameObject:
   - component: {fileID: 5357037766263318067}
   - component: {fileID: 3235906414055209765}
   - component: {fileID: 4238718387158126909}
+  - component: {fileID: 8270278203498113397}
+  - component: {fileID: 3237672623175963959}
   m_Layer: 0
   m_Name: MapImage
   m_TagString: Untagged
@@ -359,7 +361,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -388,9 +390,41 @@ MonoBehaviour:
   sceneMapData: {fileID: 11400000, guid: e91aa1a5dc7de3544866ef2e75d3dcce, type: 2}
   sceneLoader: {fileID: 0}
   worldMapCanvas: {fileID: 6768760215191398309}
+  tileRenderer: {fileID: 3237672623175963959}
   audioSource: {fileID: 0}
   regionClickSound: {fileID: 0}
   clickCooldown: 0.5
+--- !u!114 &8270278203498113397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5069679442446092415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8928d94dfa5796c4d89ceb85b879c962, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.MapTileFetcher
+  config: {fileID: 11400000, guid: 7e787f40b225f954e891a2567052d560, type: 2}
+  logRequests: 1
+  logCacheHits: 0
+--- !u!114 &3237672623175963959
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5069679442446092415}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f98935255917c89438ccc00dc9f2582d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.MapTileRenderer
+  config: {fileID: 11400000, guid: 7e787f40b225f954e891a2567052d560, type: 2}
+  tileFetcher: {fileID: 8270278203498113397}
+  tileContainer: {fileID: 0}
+  placeholderColor: {r: 0.18, g: 0.2, b: 0.24, a: 1}
 --- !u!1 &5540464599263873627
 GameObject:
   m_ObjectHideFlags: 0
@@ -751,13 +785,14 @@ GameObject:
   m_Component:
   - component: {fileID: 3461680734290347980}
   - component: {fileID: 5206408411666185897}
+  - component: {fileID: 1044896084460571069}
   m_Layer: 0
   m_Name: MapHotspotNavigator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &3461680734290347980
 Transform:
   m_ObjectHideFlags: 0
@@ -811,12 +846,11 @@ MonoBehaviour:
     m_Reference: {fileID: -6421528599365036734, guid: c348712bda248c246b8c49b3db54643f, type: 3}
   worldMapController: {fileID: 4238718387158126909}
   sceneMapData: {fileID: 11400000, guid: e91aa1a5dc7de3544866ef2e75d3dcce, type: 2}
-  hotspots:
-  - {fileID: 0}
-  - {fileID: 0}
-  autoGenerateFromData: 0
-  hotspotPrefab: {fileID: 0}
-  hotspotsContainer: {fileID: 0}
+  tileRenderer: {fileID: 3237672623175963959}
+  autoGenerateFromData: 1
+  hotspotPrefab: {fileID: 6222497501734918626, guid: 98f4f110952ab3944b816eb35fd2fb03, type: 3}
+  hotspotsContainer: {fileID: 8140777722508205807}
+  hotspots: []
   joystickThreshold: 0.5
   navigationDebounceTime: 0.3
   enableWrapping: 1
@@ -830,6 +864,47 @@ MonoBehaviour:
   tooltip: {fileID: 8700728721621096098}
   showTooltipOnSelection: 1
   tooltipOffset: {x: 0, y: 100}
+--- !u!114 &1044896084460571069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6786217765981594776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a31d3cc513a6d454eb483d0aea959cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.MapZoomPanController
+  panAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: 
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: e26f79eb-ddd9-42fc-b914-61c06d571503
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  zoomAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: 
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: 2edea49d-a2a3-4efd-9e45-dfd89ea911df
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  tileRenderer: {fileID: 3237672623175963959}
+  panSpeed: 300
+  panDeadzone: 0.15
+  zoomSpeed: 2
+  zoomDeadzone: 0.3
 --- !u!1 &7718691812557303358
 GameObject:
   m_ObjectHideFlags: 0
