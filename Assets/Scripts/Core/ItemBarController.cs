@@ -234,7 +234,6 @@ public class ItemBarController : MonoBehaviour
             var drawingManager = VRDrawing.Mode.DrawingModeManager.Instance;
             if (drawingManager != null && drawingManager.IsInDrawingMode)
             {
-                Debug.Log("[ItemBarController] Keeping UI Ray enabled - Drawing Mode is active");
                 return; // Don't disable UI Ray
             }
         }

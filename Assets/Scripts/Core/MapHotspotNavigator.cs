@@ -86,7 +86,6 @@ namespace Core
         {
             if (sceneMapData == null || hotspotPrefab == null || hotspotsContainer == null)
             {
-                Debug.LogWarning("[MapHotspotNavigator] Cannot generate hotspots: missing sceneMapData, hotspotPrefab, or hotspotsContainer.");
                 return;
             }
 
@@ -105,7 +104,6 @@ namespace Core
 
                 if (instance == null)
                 {
-                    Debug.LogWarning($"[MapHotspotNavigator] hotspotPrefab missing MapHotspot component. Skipping '{region.regionId}'.");
                     Destroy(instanceGO);
                     continue;
                 }
@@ -126,7 +124,6 @@ namespace Core
             }
 
             hotspots = generated.ToArray();
-            Debug.Log($"[MapHotspotNavigator] Auto-generated {hotspots.Length} hotspots.");
         }
 
         /// <summary>Subscribed to MapTileRenderer.OnViewChanged — repositions hotspots after pan/zoom.</summary>
@@ -162,8 +159,6 @@ namespace Core
                 hotspots[i].SetNavigator(this);
                 regionToIndexMap[hotspots[i].RegionId] = i;
             }
-
-            Debug.Log($"[MapHotspotNavigator] Initialized {hotspots.Length} hotspots.");
         }
 
         /// <summary>
@@ -183,14 +178,11 @@ namespace Core
 
             if (!region.HasValue)
             {
-                Debug.LogWarning($"[MapHotspotNavigator] No region data for hotspot {index}.");
                 return;
             }
 
             if (tooltip != null)
                 tooltip.Hide();
-
-            Debug.Log($"[MapHotspotNavigator] Confirmed: {region.Value.displayName}");
 
             if (worldMapController != null)
                 worldMapController.LoadRegion(region.Value);
