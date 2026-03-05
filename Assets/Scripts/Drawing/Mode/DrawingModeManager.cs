@@ -122,7 +122,6 @@ namespace VRDrawing.Mode
 
         public void EnterDrawingMode()
         {
-            Debug.Log("[DrawingModeManager] Enter Drawing Mode");
             if (isInDrawingMode) return;
 
             isInDrawingMode = true;
@@ -131,7 +130,6 @@ namespace VRDrawing.Mode
             DisableLocomotion();
             SpawnDrawingBoard();
             ShowToolPanel();
-
             EnableAllDrawingComponents();
 
             OnDrawingModeEntered?.Invoke();
@@ -139,7 +137,6 @@ namespace VRDrawing.Mode
 
         public void ExitDrawingMode()
         {
-            Debug.Log("[DrawingModeManager] Exit Drawing Mode");
             if (!isInDrawingMode) return;
 
             isInDrawingMode = false;
@@ -148,7 +145,6 @@ namespace VRDrawing.Mode
             DespawnDrawingBoard();
             EnableLocomotion();
             UnlockUserPosition();
-
             DisableAllDrawingComponents();
 
             OnDrawingModeExited?.Invoke();
@@ -156,65 +152,32 @@ namespace VRDrawing.Mode
 
         private void DisableAllDrawingComponents()
         {
-            Debug.Log("[DrawingModeManager] Disabling all drawing components...");
-
             if (uiRayInteractor != null)
-            {
                 uiRayInteractor.enabled = false;
-                Debug.Log("[DrawingModeManager] ✓ UI Ray Interactor disabled");
-            }
 
             if (uiRayLineVisual != null)
-            {
                 uiRayLineVisual.enabled = false;
-                Debug.Log("[DrawingModeManager] ✓ Line Visual disabled");
-            }
 
-            // SỬ DỤNG CACHED REFERENCE thay vì FindObjectsByType
             if (cachedUIRayDrawingTool != null)
-            {
                 cachedUIRayDrawingTool.enabled = false;
-                Debug.Log($"[DrawingModeManager] ✓ UIRayDrawingTool disabled");
-            }
 
             if (cachedDrawingSystemManager != null)
-            {
                 cachedDrawingSystemManager.enabled = false;
-                Debug.Log("[DrawingModeManager] ✓ DrawingSystemManager disabled");
-            }
-
-            Debug.Log("[DrawingModeManager] All drawing components disabled");
         }
 
         private void EnableAllDrawingComponents()
         {
-            Debug.Log("[DrawingModeManager] Enabling all drawing components...");
-
             if (uiRayInteractor != null)
-            {
                 uiRayInteractor.enabled = true;
-                Debug.Log("[DrawingModeManager] ✓ UI Ray Interactor enabled");
-            }
 
             if (uiRayLineVisual != null)
-            {
                 uiRayLineVisual.enabled = true;
-                Debug.Log("[DrawingModeManager] ✓ Line Visual enabled");
-            }
 
             if (cachedUIRayDrawingTool != null)
-            {
                 cachedUIRayDrawingTool.enabled = true;
-                Debug.Log($"[DrawingModeManager] ✓ UIRayDrawingTool enabled");
-            }
 
             if (cachedDrawingSystemManager != null)
-            {
                 cachedDrawingSystemManager.enabled = true;
-                Debug.Log("[DrawingModeManager] ✓ DrawingSystemManager enabled");
-            }
-
-            Debug.Log("[DrawingModeManager] All drawing components enabled");
         }
 
         private void LockUserPosition()
@@ -294,8 +257,6 @@ namespace VRDrawing.Mode
             activeDrawingBoard = Instantiate(drawingBoardPrefab, spawnPosition, spawnRotation);
             activeDrawingBoard.transform.localScale = boardScale;
             activeDrawingBoard.SetActive(true);
-            
-            Debug.Log($"[DrawingModeManager] Drawing board spawned at {spawnPosition}");
         }
 
         private void DespawnDrawingBoard()
@@ -304,7 +265,6 @@ namespace VRDrawing.Mode
             {
                 Destroy(activeDrawingBoard);
                 activeDrawingBoard = null;
-                Debug.Log("[DrawingModeManager] Drawing board despawned");
             }
         }
 
@@ -348,17 +308,12 @@ namespace VRDrawing.Mode
             activeToolPanel.transform.position = panelPosition;
             activeToolPanel.transform.rotation = panelRotation;
             activeToolPanel.SetActive(true);
-            
-            Debug.Log($"[DrawingModeManager] Tool panel shown at {panelPosition}");
         }
 
         public void HideToolPanel()
         {
             if (activeToolPanel != null)
-            {
                 activeToolPanel.SetActive(false);
-                Debug.Log("[DrawingModeManager] Tool panel hidden");
-            }
         }
 
         private Vector3 CalculatePanelPosition()

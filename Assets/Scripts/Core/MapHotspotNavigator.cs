@@ -1,130 +1,73 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 namespace Core
 {
     /// <summary>
-    /// Discrete hotspot-based navigation system for VR world map interaction.
-    /// Replaces free cursor movement with step-based hotspot selection using joystick input.
-    /// 
-    /// KEY FEATURES:
-    /// - Joystick threshold detection (not continuous movement)
-    /// - Debounce timer prevents rapid cycling
-    /// - Visual feedback through MapHotspot components
-    /// - Optional camera focus on selected hotspot
-    /// - Optional tooltip display
-    /// - Wrapping navigation (last to first)
-    /// - Auto-generation of hotspots from SceneMapData at runtime
-    /// 
+    /// Manages world map hotspots and region-load confirmation.
+    ///
+    /// INTERACTION MODEL (UI Ray):
+    ///   - Right controller UI Ray hover over a hotspot → hotspot highlights (via IPointerEnterHandler on MapHotspot)
+    ///   - Right controller trigger click while hovering → SelectAndConfirmHotspot → region loads
+    ///
     /// SETUP (Auto-generate mode):
-    /// 1. Enable autoGenerateFromData
-    /// 2. Assign hotspotPrefab (MapHotspotPrefab)
-    /// 3. Assign hotspotsContainer (RegionHotspots RectTransform)
-    /// 4. Assign SceneMapData — hotspots will be created automatically from regions[]
-    /// 
+    ///   1. Enable autoGenerateFromData
+    ///   2. Assign hotspotPrefab, hotspotsContainer, sceneMapData, tileRenderer
+    ///
     /// SETUP (Manual mode):
-    /// 1. Disable autoGenerateFromData
-    /// 2. Populate hotspots array with all MapHotspot GameObjects
-    /// 
-    /// NAVIGATION:
-    /// - Joystick Right → Next hotspot
-    /// - Joystick Left → Previous hotspot
-    /// - Joystick Up/Down → Vertical navigation (if enabled)
-    /// - Confirm Button → Load selected region
-    /// 
-    /// CONFIGURATION:
-    /// - joystickThreshold: Input sensitivity (0-1, default 0.5)
-    /// - navigationDebounceTime: Minimum time between navigations (default 0.3s)
-    /// - enableWrapping: Loop from last to first (default true)
-    /// - enableVerticalNavigation: Allow up/down input (default false)
+    ///   1. Disable autoGenerateFromData
+    ///   2. Populate hotspots[] manually
     /// </summary>
     public class MapHotspotNavigator : MonoBehaviour
     {
-        [Header("Input Actions")]
-        [SerializeField] private InputActionProperty joystickMoveAction;
-        [SerializeField] private InputActionProperty confirmButtonAction;
-
         [Header("References")]
         [SerializeField] private WorldMapController worldMapController;
         [SerializeField] private SceneMapData sceneMapData;
+        [SerializeField] private MapTileRenderer tileRenderer;
 
         [Header("Auto Generation")]
         [SerializeField] private bool autoGenerateFromData = false;
         [SerializeField] private GameObject hotspotPrefab;
         [SerializeField] private RectTransform hotspotsContainer;
 
-        [Tooltip("Only used in manual mode (Auto Generate From Data = false). Assign MapHotspot GameObjects here.")]
+        [Tooltip("Only used in manual mode (autoGenerateFromData = false).")]
         [SerializeField] private MapHotspot[] hotspots;
-
-        [Header("Navigation Settings")]
-        [SerializeField] private float joystickThreshold = 0.5f;
-        [SerializeField] private float navigationDebounceTime = 0.3f;
-        [SerializeField] private bool enableWrapping = true;
-        [SerializeField] private bool enableVerticalNavigation = false;
 
         [Header("Audio")]
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip navigationSound;
         [SerializeField] private AudioClip confirmSound;
 
-        [Header("Camera Focus (Optional)")]
-        [SerializeField] private bool enableCameraFocus = false;
-        [SerializeField] private Camera mainCamera;
-        [SerializeField] private float focusTransitionSpeed = 2f;
-
         [Header("Tooltip (Optional)")]
         [SerializeField] private MapRegionTooltip tooltip;
         [SerializeField] private bool showTooltipOnSelection = true;
-        [SerializeField] private Vector2 tooltipOffset = new Vector2(0, 50);
 
-        private int currentHotspotIndex = 0;
-        private float lastNavigationTime = 0f;
-        private Vector2 lastJoystickInput = Vector2.zero;
-        private bool wasJoystickActive = false;
+        private int currentHotspotIndex = -1;
         private Dictionary<string, int> regionToIndexMap;
 
         private void OnEnable()
         {
-            // These are shared InputActionReferences from the XRI Default Input Actions asset.
-            // Do not call Enable()/Disable() — the asset manages their lifecycle globally.
-            // Only subscribe the callback here.
-            if (confirmButtonAction.action != null)
-            {
-                confirmButtonAction.action.performed += OnConfirmPressed;
-            }
+            if (tileRenderer != null)
+                tileRenderer.OnViewChanged += OnMapViewChanged;
         }
 
         private void OnDisable()
         {
-            // Do NOT call action.Disable() on InputActionProperty references.
-            // These actions are shared with other systems (locomotion, UI interaction)
-            // via the XRI Default Input Actions asset. Disabling them here would
-            // globally break movement and UI clicking after the map is closed.
-            // Only unsubscribe the callback.
-            if (confirmButtonAction.action != null)
-            {
-                confirmButtonAction.action.performed -= OnConfirmPressed;
-            }
+            if (tileRenderer != null)
+                tileRenderer.OnViewChanged -= OnMapViewChanged;
         }
 
         private void Start()
         {
             if (autoGenerateFromData)
             {
-                // Wait one frame so the Canvas layout system has sized the container correctly
                 StartCoroutine(GenerateHotspotsNextFrame());
             }
             else
             {
                 InitializeHotspots();
-
-                if (enabled)
-                {
-                    SelectHotspot(currentHotspotIndex, immediate: true);
-                }
             }
         }
 
@@ -134,33 +77,21 @@ namespace Core
             Canvas.ForceUpdateCanvases();
             GenerateHotspotsFromData();
             InitializeHotspots();
-
-            if (enabled)
-            {
-                SelectHotspot(currentHotspotIndex, immediate: true);
-            }
         }
 
         /// <summary>
         /// Destroys all existing generated hotspots and recreates them from SceneMapData.regions.
-        /// Each region's uvBounds.center is mapped to an anchoredPosition inside hotspotsContainer.
-        /// Call this at runtime if SceneMapData changes.
         /// </summary>
         public void GenerateHotspotsFromData()
         {
             if (sceneMapData == null || hotspotPrefab == null || hotspotsContainer == null)
             {
-                Debug.LogWarning("[MapHotspotNavigator] Cannot generate hotspots: sceneMapData, hotspotPrefab or hotspotsContainer is not assigned.");
                 return;
             }
 
-            // Clear previously generated children
             for (int i = hotspotsContainer.childCount - 1; i >= 0; i--)
-            {
                 Destroy(hotspotsContainer.GetChild(i).gameObject);
-            }
 
-            Rect containerRect = hotspotsContainer.rect;
             var generated = new List<MapHotspot>();
 
             foreach (var region in sceneMapData.regions)
@@ -168,15 +99,11 @@ namespace Core
                 GameObject instanceGO = Instantiate(hotspotPrefab, hotspotsContainer);
                 instanceGO.name = $"Hotspot_{region.regionId}";
 
-                MapHotspot instance = instanceGO.GetComponent<MapHotspot>();
-                if (instance == null)
-                {
-                    instance = instanceGO.GetComponentInChildren<MapHotspot>();
-                }
+                MapHotspot instance = instanceGO.GetComponent<MapHotspot>()
+                    ?? instanceGO.GetComponentInChildren<MapHotspot>();
 
                 if (instance == null)
                 {
-                    Debug.LogWarning($"[MapHotspotNavigator] hotspotPrefab has no MapHotspot component. Skipping region '{region.regionId}'.");
                     Destroy(instanceGO);
                     continue;
                 }
@@ -184,283 +111,111 @@ namespace Core
                 instance.Initialize(region.regionId, generated.Count);
                 instance.SetNavigator(this);
 
-                // Set highlight color from region data
                 Image highlightImage = instance.GetComponent<Image>();
                 if (highlightImage != null)
-                {
                     highlightImage.color = region.regionHighlightColor;
-                }
 
-                // Convert UV center [0,1] to anchoredPosition relative to container center
-                Vector2 uvCenter = region.uvBounds.center;
                 RectTransform rt = instance.GetComponent<RectTransform>();
-                rt.anchoredPosition = new Vector2(
-                    (uvCenter.x - 0.5f) * containerRect.width,
-                    (uvCenter.y - 0.5f) * containerRect.height
-                );
+                rt.anchoredPosition = tileRenderer != null
+                    ? tileRenderer.LatLngToCanvasPosition(region.latLng.x, region.latLng.y)
+                    : Vector2.zero;
 
                 generated.Add(instance);
             }
 
             hotspots = generated.ToArray();
-            Debug.Log($"[MapHotspotNavigator] Auto-generated {hotspots.Length} hotspots from SceneMapData.");
         }
 
-        private void Update()
+        /// <summary>Subscribed to MapTileRenderer.OnViewChanged — repositions hotspots after pan/zoom.</summary>
+        private void OnMapViewChanged(Vector2 centerLatLng, float zoom) => RepositionHotspots();
+
+        /// <summary>Recalculates anchoredPosition for every hotspot based on the current tile renderer view.</summary>
+        public void RepositionHotspots()
         {
-            HandleJoystickNavigation();
+            if (hotspots == null || tileRenderer == null || sceneMapData == null) return;
+
+            for (int i = 0; i < hotspots.Length; i++)
+            {
+                if (hotspots[i] == null) continue;
+                MapRegion? region = sceneMapData.GetRegionById(hotspots[i].RegionId);
+                if (!region.HasValue) continue;
+
+                RectTransform rt = hotspots[i].GetComponent<RectTransform>();
+                if (rt != null)
+                    rt.anchoredPosition = tileRenderer.LatLngToCanvasPosition(region.Value.latLng.x, region.Value.latLng.y);
+            }
         }
 
         private void InitializeHotspots()
         {
-            if (hotspots == null || hotspots.Length == 0)
-            {
-                return;
-            }
+            if (hotspots == null || hotspots.Length == 0) return;
 
             regionToIndexMap = new Dictionary<string, int>();
 
             for (int i = 0; i < hotspots.Length; i++)
             {
-                if (hotspots[i] != null)
-                {
-                    hotspots[i].Initialize(hotspots[i].RegionId, i);
-                    hotspots[i].SetNavigator(this);
-                    regionToIndexMap[hotspots[i].RegionId] = i;
-                }
-            }
-
-            Debug.Log($"[MapHotspotNavigator] Initialized {hotspots.Length} hotspots");
-        }
-
-        private void HandleJoystickNavigation()
-        {
-            if (Time.time - lastNavigationTime < navigationDebounceTime)
-            {
-                return;
-            }
-
-            Vector2 joystickInput = GetMoveInput();
-
-            bool isJoystickActive = joystickInput.magnitude > joystickThreshold;
-
-            if (isJoystickActive && !wasJoystickActive)
-            {
-                ProcessNavigationInput(joystickInput);
-                lastNavigationTime = Time.time;
-            }
-
-            wasJoystickActive = isJoystickActive;
-            lastJoystickInput = joystickInput;
-        }
-
-        private Vector2 GetMoveInput()
-        {
-            if (joystickMoveAction.action != null)
-            {
-                return joystickMoveAction.action.ReadValue<Vector2>();
-            }
-
-            return Vector2.zero;
-        }
-
-        private void ProcessNavigationInput(Vector2 input)
-        {
-            if (hotspots == null || hotspots.Length == 0) return;
-
-            int targetIndex = currentHotspotIndex;
-
-            if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
-            {
-                if (input.x > joystickThreshold)
-                {
-                    targetIndex = GetNextHotspotIndex(1);
-                }
-                else if (input.x < -joystickThreshold)
-                {
-                    targetIndex = GetNextHotspotIndex(-1);
-                }
-            }
-            else if (enableVerticalNavigation)
-            {
-                if (input.y > joystickThreshold)
-                {
-                    targetIndex = GetNextHotspotIndex(1);
-                }
-                else if (input.y < -joystickThreshold)
-                {
-                    targetIndex = GetNextHotspotIndex(-1);
-                }
-            }
-
-            if (targetIndex != currentHotspotIndex)
-            {
-                SelectHotspot(targetIndex);
-                PlaySound(navigationSound);
+                if (hotspots[i] == null) continue;
+                hotspots[i].Initialize(hotspots[i].RegionId, i);
+                hotspots[i].SetNavigator(this);
+                regionToIndexMap[hotspots[i].RegionId] = i;
             }
         }
 
-        private int GetNextHotspotIndex(int direction)
+        /// <summary>
+        /// Called by MapHotspot.OnPointerClick via UI Ray trigger press.
+        /// Marks the clicked hotspot as current and immediately loads its region.
+        /// </summary>
+        public void SelectAndConfirmHotspot(int index)
         {
-            int newIndex = currentHotspotIndex + direction;
-
-            if (enableWrapping)
-            {
-                if (newIndex >= hotspots.Length)
-                {
-                    newIndex = 0;
-                }
-                else if (newIndex < 0)
-                {
-                    newIndex = hotspots.Length - 1;
-                }
-            }
-            else
-            {
-                newIndex = Mathf.Clamp(newIndex, 0, hotspots.Length - 1);
-            }
-
-            return newIndex;
-        }
-
-        private void SelectHotspot(int index, bool immediate = false)
-        {
-            if (index < 0 || index >= hotspots.Length) return;
-
-            if (hotspots[currentHotspotIndex] != null)
-            {
-                hotspots[currentHotspotIndex].SetActive(false, immediate);
-            }
+            if (hotspots == null || index < 0 || index >= hotspots.Length) return;
 
             currentHotspotIndex = index;
+            PlaySound(confirmSound);
 
-            if (hotspots[currentHotspotIndex] != null)
-            {
-                hotspots[currentHotspotIndex].SetActive(true, immediate);
+            MapRegion? region = sceneMapData != null
+                ? sceneMapData.GetRegionById(hotspots[index].RegionId)
+                : null;
 
-                MapRegion? region = GetCurrentRegion();
-                if (region.HasValue)
-                {
-                    if (showTooltipOnSelection && tooltip != null)
-                    {
-                        Vector3 hotspotPosition = hotspots[currentHotspotIndex].transform.position;
-                        string description = $"Region ID: {region.Value.regionId}\nClick Trigger to Load";
-                        tooltip.Show(region.Value.displayName, description, hotspotPosition);
-                    }
-
-                    if (enableCameraFocus && mainCamera != null)
-                    {
-                        FocusCameraOnHotspot(hotspots[currentHotspotIndex]);
-                    }
-                }
-            }
-
-            Debug.Log($"[MapHotspotNavigator] Selected hotspot {currentHotspotIndex}");
-        }
-
-        private void OnConfirmPressed(InputAction.CallbackContext context)
-        {
-            ConfirmSelection();
-        }
-
-        public void ConfirmSelection()
-        {
-            MapRegion? region = GetCurrentRegion();
             if (!region.HasValue)
             {
                 return;
             }
 
-            PlaySound(confirmSound);
-
             if (tooltip != null)
-            {
                 tooltip.Hide();
-            }
-
-            Debug.Log($"[MapHotspotNavigator] Confirmed: {region.Value.displayName}");
 
             if (worldMapController != null)
-            {
                 worldMapController.LoadRegion(region.Value);
-            }
         }
 
-        private MapRegion? GetCurrentRegion()
+        /// <summary>Immediately loads a region without hotspot click, used by external systems.</summary>
+        public void ConfirmSelection()
         {
-            if (hotspots == null || currentHotspotIndex >= hotspots.Length)
-            {
-                return null;
-            }
-
-            MapHotspot hotspot = hotspots[currentHotspotIndex];
-            if (hotspot == null || sceneMapData == null)
-            {
-                return null;
-            }
-
-            return sceneMapData.GetRegionById(hotspot.RegionId);
+            if (hotspots == null || currentHotspotIndex < 0 || currentHotspotIndex >= hotspots.Length) return;
+            SelectAndConfirmHotspot(currentHotspotIndex);
         }
 
-        private void FocusCameraOnHotspot(MapHotspot hotspot)
+        /// <summary>Navigates to a hotspot by regionId (used by external systems, e.g. mini-map).</summary>
+        public void NavigateToRegion(string regionId)
         {
-            if (mainCamera == null || hotspot == null) return;
-
-            StartCoroutine(SmoothCameraFocus(hotspot.transform.position));
+            if (regionToIndexMap != null && regionToIndexMap.TryGetValue(regionId, out int index))
+                currentHotspotIndex = index;
         }
 
-        private IEnumerator SmoothCameraFocus(Vector3 targetPosition)
-        {
-            Vector3 startPosition = mainCamera.transform.position;
-            Vector3 endPosition = new Vector3(targetPosition.x, targetPosition.y, startPosition.z);
-
-            float elapsed = 0f;
-            float duration = 1f / focusTransitionSpeed;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.deltaTime;
-                float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
-                mainCamera.transform.position = Vector3.Lerp(startPosition, endPosition, t);
-                yield return null;
-            }
-
-            mainCamera.transform.position = endPosition;
-        }
+        public void ResetToFirstHotspot() => currentHotspotIndex = 0;
 
         private void PlaySound(AudioClip clip)
         {
             if (audioSource != null && clip != null)
-            {
                 audioSource.PlayOneShot(clip);
-            }
         }
 
-        public void NavigateToRegion(string regionId)
-        {
-            if (regionToIndexMap != null && regionToIndexMap.TryGetValue(regionId, out int index))
-            {
-                SelectHotspot(index);
-            }
-        }
-
-        /// <summary>Selects the hotspot at the given index then immediately confirms (loads the region). Used by MapHotspot click handler.</summary>
-        public void SelectAndConfirmHotspot(int index)
-        {
-            SelectHotspot(index);
-            ConfirmSelection();
-        }
-
-        public void ResetToFirstHotspot()
-        {
-            SelectHotspot(0);
-        }
-
-        public MapHotspot CurrentHotspot => hotspots != null && currentHotspotIndex < hotspots.Length 
-            ? hotspots[currentHotspotIndex] 
+        public MapHotspot CurrentHotspot => hotspots != null && currentHotspotIndex >= 0 && currentHotspotIndex < hotspots.Length
+            ? hotspots[currentHotspotIndex]
             : null;
 
         public int CurrentIndex => currentHotspotIndex;
         public int HotspotCount => hotspots != null ? hotspots.Length : 0;
     }
 }
+

@@ -128,8 +128,6 @@ namespace VRDrawing
 
         private void OnToolEntered(DrawingToolBase tool, DrawingSurface surface, Vector3 worldPos)
         {
-            Debug.Log($"[DrawingSurface] OnToolEntered called! tool={tool?.name}, surface={surface?.name}, this={this.name}");
-
             if (surface != this || tool == null) return;
 
             if (tool.Type == ToolType.Eraser)
@@ -180,20 +178,14 @@ namespace VRDrawing
 
         private void HandleDrawToolEnter(DrawingToolBase tool, Vector3 worldPos)
         {
-            Debug.Log($"[DrawingSurface] HandleDrawToolEnter! worldPos={worldPos}");
-            Debug.Log($"[DrawingSurface] 🎨 Tool color: {tool.Color}");
-            
             Vector2 uv = WorldToSurfaceUV(worldPos);
             
             Stroke newStroke = new Stroke(tool.Color, tool.Width, tool.ToolId);
             newStroke.AddPoint(uv);
 
-            Debug.Log($"[DrawingSurface] 🎨 Stroke color: {newStroke.color}");
-
             activeStrokes[tool] = newStroke;
             
             drawingData.strokes.Add(newStroke);
-            Debug.Log($"[DrawingSurface] Stroke added! Total: {drawingData.strokes.Count}");
 
             PlayAudio(drawingAudioClip);
         }
@@ -221,9 +213,7 @@ namespace VRDrawing
             }
 
             currentStroke.AddPoint(uv);
-            Debug.Log($"[DrawingSurface] Point added! Stroke now has {currentStroke.points.Count} points");
             strokeRenderer.UpdateStroke(currentStroke);
-            Debug.Log($"[DrawingSurface] UpdateStroke called");
         }
 
         private void HandleEraserEnter(DrawingToolBase tool, Vector3 worldPos)
@@ -276,16 +266,10 @@ namespace VRDrawing
         {
             Vector3 localPos = transform.InverseTransformPoint(worldPos);
             
-            Debug.Log($"[DrawingSurface] WorldToSurfaceUV: worldPos={worldPos}, localPos={localPos}, surfaceSize={surfaceSize}");
-            
             float u = (localPos.x / surfaceSize.x) + 0.5f;
             float v = (localPos.y / surfaceSize.y) + 0.5f;
             
-            Vector2 uv = new Vector2(Mathf.Clamp01(u), Mathf.Clamp01(v));
-            
-            Debug.Log($"[DrawingSurface] Calculated UV: u={u}, v={v}, final={uv}");
-
-            return uv;
+            return new Vector2(Mathf.Clamp01(u), Mathf.Clamp01(v));
         }
 
 

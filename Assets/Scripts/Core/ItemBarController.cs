@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
 using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
 using System.Collections.Generic;
 
 public class ItemBarController : MonoBehaviour
@@ -30,6 +31,10 @@ public class ItemBarController : MonoBehaviour
     [Header("Map")]
     [SerializeField] private GameObject worldMapCanvasObject;
     private const string MapButtonLabel = "Map";
+
+    [Header("Locomotion")]
+    [Tooltip("Turn providers to disable while the map is open so right joystick zooms instead of turning.")]
+    [SerializeField] private SnapTurnProvider[] turnProvidersToDisableOnMap;
     
     private XRInteractorLineVisual lineVisual;
     
@@ -160,21 +165,33 @@ public class ItemBarController : MonoBehaviour
         if (worldMapCanvasObject == null) return;
 
         bool mapCurrentlyActive = worldMapCanvasObject.activeSelf;
-        worldMapCanvasObject.SetActive(!mapCurrentlyActive);
+        bool mapOpening = !mapCurrentlyActive;
 
+        worldMapCanvasObject.SetActive(mapOpening);
         HideBar();
 
-        // Keep UI Ray enabled when map is open so hotspots can be clicked
-        if (!mapCurrentlyActive)
-        {
-            UpdateUIRayVisibility(true);
-        }
+        // HideBar() calls UpdateUIRayVisibility(false) — restore to correct state after.
+        UpdateUIRayVisibility(mapOpening);
+
+        // Disable turn providers while map is open; right joystick now zooms the map.
+        SetTurnProvidersEnabled(!mapOpening);
     }
 
-    /// <summary>Disables the UI Ray Interactor. Called externally when the map closes after a region is loaded.</summary>
+    /// <summary>Disables the UI Ray Interactor and re-enables locomotion. Called when the map closes after a region is loaded.</summary>
     public void DisableUIRay()
     {
         UpdateUIRayVisibility(false);
+        SetTurnProvidersEnabled(true);
+    }
+
+    private void SetTurnProvidersEnabled(bool enabled)
+    {
+        if (turnProvidersToDisableOnMap == null) return;
+        foreach (var provider in turnProvidersToDisableOnMap)
+        {
+            if (provider != null)
+                provider.enabled = enabled;
+        }
     }
 
     private void OnToggleBar(InputAction.CallbackContext context)
@@ -217,7 +234,6 @@ public class ItemBarController : MonoBehaviour
             var drawingManager = VRDrawing.Mode.DrawingModeManager.Instance;
             if (drawingManager != null && drawingManager.IsInDrawingMode)
             {
-                Debug.Log("[ItemBarController] Keeping UI Ray enabled - Drawing Mode is active");
                 return; // Don't disable UI Ray
             }
         }

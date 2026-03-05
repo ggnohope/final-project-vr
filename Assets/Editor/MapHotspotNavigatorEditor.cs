@@ -10,77 +10,57 @@ namespace Core.Editor
         {
             serializedObject.Update();
 
-            // Input Actions
-            EditorGUILayout.LabelField("Input Actions", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("joystickMoveAction"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("confirmButtonAction"));
-
-            EditorGUILayout.Space();
-
             // References
             EditorGUILayout.LabelField("References", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("worldMapController"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("sceneMapData"));
+            DrawProperty("worldMapController");
+            DrawProperty("sceneMapData");
+            DrawProperty("tileRenderer");
 
             EditorGUILayout.Space();
 
             // Auto Generation — hotspots array chỉ hiện khi manual mode
             EditorGUILayout.LabelField("Auto Generation", EditorStyles.boldLabel);
             SerializedProperty autoGenerate = serializedObject.FindProperty("autoGenerateFromData");
-            EditorGUILayout.PropertyField(autoGenerate);
-
-            EditorGUI.indentLevel++;
-            if (autoGenerate.boolValue)
+            if (autoGenerate != null)
             {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("hotspotPrefab"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("hotspotsContainer"));
-            }
-            else
-            {
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("hotspots"), true);
-            }
-            EditorGUI.indentLevel--;
-
-            EditorGUILayout.Space();
-
-            // Navigation Settings
-            EditorGUILayout.LabelField("Navigation Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("joystickThreshold"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("navigationDebounceTime"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableWrapping"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("enableVerticalNavigation"));
-
-            EditorGUILayout.Space();
-
-            // Audio
-            EditorGUILayout.LabelField("Audio", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("audioSource"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("navigationSound"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("confirmSound"));
-
-            EditorGUILayout.Space();
-
-            // Camera Focus
-            EditorGUILayout.LabelField("Camera Focus (Optional)", EditorStyles.boldLabel);
-            SerializedProperty enableCameraFocus = serializedObject.FindProperty("enableCameraFocus");
-            EditorGUILayout.PropertyField(enableCameraFocus);
-            if (enableCameraFocus.boolValue)
-            {
+                EditorGUILayout.PropertyField(autoGenerate);
                 EditorGUI.indentLevel++;
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("mainCamera"));
-                EditorGUILayout.PropertyField(serializedObject.FindProperty("focusTransitionSpeed"));
+                if (autoGenerate.boolValue)
+                {
+                    DrawProperty("hotspotPrefab");
+                    DrawProperty("hotspotsContainer");
+                }
+                else
+                {
+                    DrawProperty("hotspots", includeChildren: true);
+                }
                 EditorGUI.indentLevel--;
             }
 
             EditorGUILayout.Space();
 
+            // Audio
+            EditorGUILayout.LabelField("Audio", EditorStyles.boldLabel);
+            DrawProperty("audioSource");
+            DrawProperty("navigationSound");
+            DrawProperty("confirmSound");
+
+            EditorGUILayout.Space();
+
             // Tooltip
             EditorGUILayout.LabelField("Tooltip (Optional)", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("tooltip"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("showTooltipOnSelection"));
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("tooltipOffset"));
+            DrawProperty("tooltip");
+            DrawProperty("showTooltipOnSelection");
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        /// <summary>Draws a property field only if the property exists on the serialized object.</summary>
+        private void DrawProperty(string propertyName, bool includeChildren = false)
+        {
+            SerializedProperty prop = serializedObject.FindProperty(propertyName);
+            if (prop != null)
+                EditorGUILayout.PropertyField(prop, includeChildren);
         }
     }
 }

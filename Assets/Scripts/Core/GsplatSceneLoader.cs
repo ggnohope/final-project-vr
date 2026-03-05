@@ -134,7 +134,6 @@ namespace Core
 
             if (request.asset == null)
             {
-                Debug.LogError($"[GsplatSceneLoader] GsplatAsset not found at Resources path: {plyPath}");
                 yield break;
             }
 
@@ -189,8 +188,6 @@ namespace Core
             if (safeBands < originalBands)
             {
                 asset.SHBands = safeBands;
-                Debug.LogWarning($"[GsplatSceneLoader] '{asset.name}' has {asset.SplatCount} splats. " +
-                                 $"SHBands capped {originalBands} → {safeBands} to stay within 128MB GPU buffer limit.");
             }
 #endif
         }

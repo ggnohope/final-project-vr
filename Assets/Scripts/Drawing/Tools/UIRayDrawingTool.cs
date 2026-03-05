@@ -31,14 +31,10 @@ namespace VRDrawing.Tools
 
         protected override void Awake()
         {
-            Debug.Log("[UIRayDrawingTool] Awake() called!");
-            Debug.Log("[UIRayDrawingTool] Awake() called!:   " + drawWidth);
             base.Awake();
 
             if (autoFindRayInteractor && rayInteractor == null)
-            {
                 rayInteractor = GetComponent<XRRayInteractor>();
-            }
 
             if (rayInteractor == null)
             {
@@ -47,8 +43,6 @@ namespace VRDrawing.Tools
                 return;
             }
 
-            Debug.Log($"[UIRayDrawingTool] XRRayInteractor found: {rayInteractor.name}");
-
             if (audioSource != null)
             {
                 audioSource.playOnAwake = false;
@@ -56,18 +50,10 @@ namespace VRDrawing.Tools
                 audioSource.volume = audioVolume;
             }
 
-
             if (DrawingSystemManager.Instance != null)
-            {
                 DrawingSystemManager.Instance.RegisterTool(this);
-                Debug.Log("[UIRayDrawingTool] Registered with DrawingSystemManager");
-            }
             else
-            {
-                Debug.LogWarning("[UIRayDrawingTool] DrawingSystemManager.Instance is NULL!");
-            }
-            
-            Debug.Log("[UIRayDrawingTool] Awake() completed successfully!");
+                Debug.LogWarning("UIRayDrawingTool: DrawingSystemManager.Instance is NULL.");
         }
 
 

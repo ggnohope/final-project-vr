@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9600a182a63333e4c87d2aa72b5cb742, type: 3}
+  m_Name: MapboxConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Core.MapboxConfig
+  accessToken: 
+  styleId: mapbox/streets-v12
+  tileSize: 256
+  defaultCenter: {x: 16, y: 106.5}
+  defaultZoom: 5
+  minZoom: 3
+  maxZoom: 8
+  minBounds: {x: 7, y: 100.5}
+  maxBounds: {x: 24.5, y: 110.5}
+  maxCachedTiles: 64

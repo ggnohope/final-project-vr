@@ -16,7 +16,10 @@ namespace Core
     {
         public string regionId;
         public string displayName;
-        public Rect uvBounds;
+
+        [Tooltip("Province centroid in decimal degrees. x = latitude (N), y = longitude (E).")]
+        public Vector2 latLng;
+
         public string plyAssetPath;
         public CameraConfig cameraConfig;
         public Color regionHighlightColor;
@@ -26,6 +29,7 @@ namespace Core
     public class SceneMapData : ScriptableObject
     {
         [Header("World Map Settings")]
+        [Tooltip("No longer used — map tiles are fetched from Mapbox. Can be left empty.")]
         public Texture2D worldMapTexture;
         
         [Header("Region Definitions")]
@@ -40,15 +44,12 @@ namespace Core
         public Sprite loadingScreenOverlay;
         public string loadingTextFormat = "Loading {0}...";
 
+        /// <summary>
+        /// Legacy UV-based lookup — no longer used with tile map.
+        /// Kept to avoid breaking references; always returns null.
+        /// </summary>
         public MapRegion? GetRegionByPosition(Vector2 normalizedPosition)
         {
-            foreach (var region in regions)
-            {
-                if (region.uvBounds.Contains(normalizedPosition))
-                {
-                    return region;
-                }
-            }
             return null;
         }
 
