@@ -6607,11 +6607,6 @@ MonoBehaviour:
   moveLocomotionObject: {fileID: 1591481664}
   distanceFromPlayer: 2
   positionOffset: {x: 0, y: 0, z: 0}
---- !u!223 &793521964 stripped
-Canvas:
-  m_CorrespondingSourceObject: {fileID: 6768760215191398309, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
-  m_PrefabInstance: {fileID: 793521957}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &793521966
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6624,9 +6619,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcdca4789e6bfd249b243e2b8c1fddf7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Core.MapUIRaycastDiagnostics
-  mapCanvas: {fileID: 793521964}
-  uiRayInteractor: {fileID: 696807387}
-  hotspotsContainer: {fileID: 2064262116}
 --- !u!114 &793521967
 MonoBehaviour:
   m_ObjectHideFlags: 0
