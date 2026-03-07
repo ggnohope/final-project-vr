@@ -41,8 +41,8 @@ namespace Core
         [SerializeField] [Range(0f, 1f)] private float panDeadzone = 0.15f;
 
         [Header("Zoom Settings")]
-        [Tooltip("Zoom levels per second at full joystick deflection.")]
-        [SerializeField] private float zoomSpeed = 2f;
+        [Tooltip("Seconds to wait before allowing the next zoom step while joystick is held.")]
+        [SerializeField] private float zoomCooldown = 0.4f;
 
         [Tooltip("Y-axis magnitude below which zoom is ignored.")]
         [SerializeField] [Range(0f, 1f)] private float zoomDeadzone = 0.3f;
@@ -51,6 +51,8 @@ namespace Core
                  "(increase detail). Most VR controllers have Y axis physically inverted " +
                  "on the Turn action, so this should be true.")]
         [SerializeField] private bool invertZoom = true;
+
+        private float lastZoomTime = -999f;
 
         // Tracks whether we force-enabled a reference action that was already disabled
         // (e.g. the Turn action is disabled when the project uses snap turn).
@@ -98,11 +100,12 @@ namespace Core
             float zoomInput = invertZoom ? -rawY : rawY;
 
             if (Mathf.Abs(zoomInput) < zoomDeadzone) return;
+            if (Time.time - lastZoomTime < zoomCooldown) return;
 
-            float remapped = (Mathf.Abs(zoomInput) - zoomDeadzone) / (1f - zoomDeadzone);
-            float delta = Mathf.Sign(zoomInput) * remapped * zoomSpeed * Time.deltaTime;
+            lastZoomTime = Time.time;
 
-            tileRenderer.AdjustZoom(delta);
+            // Pass only the sign — AdjustZoom snaps to the next integer level.
+            tileRenderer.AdjustZoom(Mathf.Sign(zoomInput));
         }
 
         /// <summary>

@@ -139,10 +139,21 @@ namespace Core
             RefreshTiles();
         }
 
-        /// <summary>Zooms by delta. Positive = zoom in (larger features), negative = zoom out.</summary>
+        /// <summary>
+        /// Snaps zoom to the nearest integer level in the direction of delta.
+        /// Tile textures only exist at integer zoom levels, so fractional zoom
+        /// never triggers new tile fetches — snapping guarantees a tile refresh
+        /// on every joystick input that crosses a zoom boundary.
+        /// </summary>
         public void AdjustZoom(float delta)
         {
-            zoom = Mathf.Clamp(zoom + delta, config.minZoom, config.maxZoom);
+            if (Mathf.Approximately(delta, 0f)) return;
+
+            float target = delta > 0f
+                ? Mathf.Floor(zoom) + 1f   // zoom in  → next integer up
+                : Mathf.Ceil(zoom)  - 1f;  // zoom out → next integer down
+
+            zoom = Mathf.Clamp(target, config.minZoom, config.maxZoom);
             RefreshTiles();
         }
 
@@ -186,7 +197,10 @@ namespace Core
             if (canvas.width > 1f && canvas.height > 1f)
                 cachedCanvasSize = new Vector2(canvas.width, canvas.height);
             else if (cachedCanvasSize.sqrMagnitude < 1f)
+            {
+                Debug.LogWarning($"[MapTileRenderer] RefreshTiles aborted — canvas not ready: rect={canvas} | cachedCanvasSize={cachedCanvasSize}");
                 return;
+            }
 
             float halfW = cachedCanvasSize.x * 0.5f;
             float halfH = cachedCanvasSize.y * 0.5f;
@@ -229,9 +243,13 @@ namespace Core
                     toRemove.Add(kv.Key);
                 }
             }
+
+            int returnedCount = toRemove.Count;
             foreach (var key in toRemove) activeTiles.Remove(key);
 
             // Create or reposition tiles for all needed keys
+            int newRequests = 0;
+            int repositioned = 0;
             foreach (var key in neededKeys)
             {
                 Vector2 canvasPos = TileToCanvasPosition(key.X, key.Y, centerTileFloorX, centerTileFloorY, renderTileSize);
@@ -250,12 +268,18 @@ namespace Core
 
                     tileFetcher.RequestTile(key.X, key.Y, key.Zoom, tex =>
                     {
-                        if (capturedImage != null && activeTiles.TryGetValue(capturedKey, out RawImage current) && current == capturedImage)
+                        bool isStillActive = capturedImage != null && activeTiles.TryGetValue(capturedKey, out RawImage current) && current == capturedImage;
+                        if (isStillActive)
                         {
                             capturedImage.texture = tex;
                             capturedImage.color   = tex != null ? Color.white : placeholderColor;
                         }
                     });
+                    newRequests++;
+                }
+                else
+                {
+                    repositioned++;
                 }
 
                 // Size and position — +1px overlap prevents sub-pixel seam artifacts

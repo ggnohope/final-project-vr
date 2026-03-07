@@ -251,5 +251,52 @@ namespace Lobby
         }
 
         #endregion
+
+        // ─────────────────────────────────────────────────────────────
+        #region Demo / Editor Helpers
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// Injects fake room entries for screenshot / demo purposes.
+        /// Call via right-click on LobbyManager component → "Demo: Inject Fake Rooms".
+        /// Works in Play Mode without a real Photon connection.
+        /// </summary>
+        [ContextMenu("Demo: Inject Fake Rooms")]
+        private void InjectFakeRooms()
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogWarning("[LobbyManager] Demo inject only works in Play Mode.");
+                return;
+            }
+
+            cachedRoomList.Clear();
+            ClearRoomListView();
+
+            var fakeRooms = new[]
+            {
+                ("Field Survey A", 3, 8),
+                ("Mapping Session B", 1, 8),
+                ("Rock ID Lab", 5, 8),
+            };
+
+            foreach (var (roomName, playerCount, maxPlayers) in fakeRooms)
+            {
+                // Spawn entry directly without RoomInfo (which requires Photon internals)
+                GameObject entry = Instantiate(roomListEntryPrefab, roomListContent);
+                entry.transform.localScale = Vector3.one;
+
+                if (entry.GetComponentInChildren<TMP_Text>() is TMP_Text label)
+                    label.text = $"{roomName}  ({playerCount}/{maxPlayers})";
+
+                roomListEntries[roomName] = entry;
+            }
+
+            ShowPanel(roomListPanel);
+            Debug.Log("[LobbyManager] Fake rooms injected for demo.");
+        }
+#endif
+
+        #endregion
     }
 }
