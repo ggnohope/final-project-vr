@@ -72,3 +72,5 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
 .env
+/Assets/Resources/Config/ApiConfig.asset
+/Assets/Resources/Config/ApiConfig.asset.meta
