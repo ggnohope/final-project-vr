@@ -28,7 +28,7 @@ namespace Lobby
         [SerializeField] private GameObject roomPanel;
         [SerializeField] private TMP_InputField roomNameInput;
         [SerializeField] private Button createRoomButton;
-        [SerializeField] private Button quickJoinButton;
+        [SerializeField] private Button findRoomButton;
 
         // ── Room List Panel ───────────────────────────────────────────
         [Header("Room List Panel")]
@@ -36,6 +36,10 @@ namespace Lobby
         [SerializeField] private Transform roomListContent;
         [SerializeField] private GameObject roomListEntryPrefab;
         [SerializeField] private Button backFromListButton;
+
+        // ── VR Keyboard ───────────────────────────────────────────────
+        [Header("VR Keyboard")]
+        [SerializeField] private VRKeyboard vrKeyboard;
 
         // ── Status ────────────────────────────────────────────────────
         [Header("Status")]
@@ -53,7 +57,7 @@ namespace Lobby
 
             confirmNameButton.onClick.AddListener(OnConfirmNameClicked);
             createRoomButton.onClick.AddListener(OnCreateRoomClicked);
-            quickJoinButton.onClick.AddListener(OnQuickJoinClicked);
+            findRoomButton.onClick.AddListener(OnFindRoomClicked);
 
             if (backFromListButton != null)
                 backFromListButton.onClick.AddListener(OnBackFromListClicked);
@@ -77,6 +81,11 @@ namespace Lobby
             }
 
             PhotonNetwork.NickName = playerName;
+
+            // Clear the name input and close the keyboard before switching panels.
+            playerNameInput.text = string.Empty;
+            vrKeyboard?.Hide();
+
             SetStatus("Connecting...");
             confirmNameButton.interactable = false;
 
@@ -86,23 +95,27 @@ namespace Lobby
                 PhotonNetwork.ConnectUsingSettings();
         }
 
-        /// <summary>Creates a room with an optional custom name.</summary>
+        /// <summary>Creates a room. Room name is required — shows an error if left empty.</summary>
         private void OnCreateRoomClicked()
         {
             string roomName = roomNameInput.text.Trim();
             if (string.IsNullOrEmpty(roomName))
-                roomName = "Room " + Random.Range(1000, 9999);
+            {
+                SetStatus("Please enter a room name.");
+                return;
+            }
 
             var options = new RoomOptions { MaxPlayers = MaxPlayersPerRoom };
             SetStatus($"Creating room \"{roomName}\"...");
             PhotonNetwork.CreateRoom(roomName, options);
         }
 
-        /// <summary>Attempts to join any open random room; creates one if none exist.</summary>
-        private void OnQuickJoinClicked()
+        /// <summary>Opens the room list panel so the user can browse and select an existing room.</summary>
+        private void OnFindRoomClicked()
         {
-            SetStatus("Finding a room...");
-            PhotonNetwork.JoinRandomRoom();
+            ShowPanel(roomListPanel);
+            RefreshRoomListView();
+            SetStatus("Select a room to join.");
         }
 
         private void OnBackFromListClicked()
@@ -116,6 +129,12 @@ namespace Lobby
         #region PUN Callbacks
 
         public override void OnConnectedToMaster()
+        {
+            SetStatus("Connected. Joining lobby...");
+            PhotonNetwork.JoinLobby();
+        }
+
+        public override void OnJoinedLobby()
         {
             SetStatus("Connected.");
             ShowPanel(roomPanel);
@@ -136,15 +155,6 @@ namespace Lobby
                 PhotonNetwork.LoadLevel(PropsSceneName);
         }
 
-        public override void OnJoinRandomFailed(short returnCode, string message)
-        {
-            // No rooms available – create one automatically.
-            string roomName = "Room " + Random.Range(1000, 9999);
-            var options = new RoomOptions { MaxPlayers = MaxPlayersPerRoom };
-            SetStatus($"No rooms found. Creating \"{roomName}\"...");
-            PhotonNetwork.CreateRoom(roomName, options);
-        }
-
         public override void OnCreateRoomFailed(short returnCode, string message)
         {
             SetStatus($"Create room failed: {message}");
@@ -161,12 +171,6 @@ namespace Lobby
         {
             UpdateCachedRoomList(roomList);
             RefreshRoomListView();
-        }
-
-        public override void OnJoinedLobby()
-        {
-            cachedRoomList.Clear();
-            ClearRoomListView();
         }
 
         public override void OnLeftLobby()
