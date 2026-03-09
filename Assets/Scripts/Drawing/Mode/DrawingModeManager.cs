@@ -257,6 +257,28 @@ namespace VRDrawing.Mode
             activeDrawingBoard = Instantiate(drawingBoardPrefab, spawnPosition, spawnRotation);
             activeDrawingBoard.transform.localScale = boardScale;
             activeDrawingBoard.SetActive(true);
+
+            // Attach SymbolLayerManager to the spawned board's DrawingSurface
+            AttachSymbolLayerToBoard(activeDrawingBoard);
+        }
+
+        /// <summary>
+        /// Finds the DrawingSurface on the newly-spawned board and calls
+        /// SymbolLayerManager.AttachToSurface so symbols can be placed immediately.
+        /// </summary>
+        private void AttachSymbolLayerToBoard(GameObject board)
+        {
+            if (VRDrawing.Features.SymbolLayerManager.Instance == null) return;
+
+            DrawingSurface surface = board.GetComponentInChildren<DrawingSurface>();
+            if (surface == null)
+            {
+                Debug.LogWarning("[DrawingModeManager] DrawingSurface not found on spawned board.");
+                return;
+            }
+
+            VRDrawing.Features.SymbolLayerManager.Instance.AttachToSurface(surface);
+            Debug.Log($"[DrawingModeManager] SymbolLayerManager attached to '{surface.name}'.");
         }
 
         private void DespawnDrawingBoard()

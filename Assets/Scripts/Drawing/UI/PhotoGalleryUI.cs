@@ -207,10 +207,15 @@ namespace VRDrawing.UI
 
         private void OnPhotoSelected(Texture2D photo)
         {
+            Debug.Log($"[PhotoGalleryUI] OnPhotoSelected: photo='{photo?.name}', PhotoPlacementManager.Instance={VRDrawing.Photo.PhotoPlacementManager.Instance}");
+
             if (VRDrawing.Photo.PhotoPlacementManager.Instance != null)
             {
                 VRDrawing.Photo.PhotoPlacementManager.Instance.EnterPlacementMode(photo);
-                Debug.Log($"[PhotoGalleryUI] Photo '{photo.name}' selected - Click on board to place");
+            }
+            else
+            {
+                Debug.LogError("[PhotoGalleryUI] PhotoPlacementManager.Instance is null — ensure a PhotoPlacementManager exists in the scene.");
             }
 
             CloseGallery();

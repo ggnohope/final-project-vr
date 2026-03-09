@@ -38,6 +38,9 @@ namespace VRDrawing
         public int StrokeCount => drawingData?.GetStrokeCount() ?? 0;
         public bool HasActiveStroke => activeStrokes.Count > 0;
 
+        /// <summary>Returns the physical size (width, height in metres) of this drawing surface.</summary>
+        public Vector2 GetSurfaceSize() => surfaceSize;
+
         public System.Action<Stroke> OnStrokeAdded;
         public System.Action<Stroke> OnStrokeRemoved;
         public System.Action OnCleared;

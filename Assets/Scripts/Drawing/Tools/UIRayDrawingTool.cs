@@ -78,107 +78,62 @@ namespace VRDrawing.Tools
         {
             if (!isEnabled || rayInteractor == null)
             {
-                Debug.LogWarning($"[UIRayDrawingTool] Update() RETURN EARLY: isEnabled={isEnabled}, rayInteractor={rayInteractor != null}");
+                // Only log once per state change, not every frame
                 return;
             }
 
             if (VRDrawing.Photo.PhotoPlacementManager.Instance != null && 
                 VRDrawing.Photo.PhotoPlacementManager.Instance.IsInPlacementMode)
             {
-                Debug.Log("[UIRayDrawingTool] ⏸️ Skipping drawing - Photo Placement Mode active");
-                
-                // End current drawing nếu đang vẽ
-                if (isDrawing)
-                {
-                    EndDrawing();
-                }
-                
+                if (isDrawing) EndDrawing();
                 return;
             }
 
-            bool isDrawActionActive = false;
-            // Debug.Log("isDrawActionActive" + isDrawActionActive);
-            if (drawAction.action != null)
-            {
-                isDrawActionActive = drawAction.action.IsPressed();
-            }
-            // if (Input.GetKey(KeyCode.Space))
-            // {
-            //     isDrawActionActive = true;
-            //     Debug.Log("[UIRayDrawingTool] 🎮 SIMULATING SELECT with SPACE key");
-            // }
-            // DEBUG: Log every frame when select is active
-            if (isDrawActionActive)
-            {
-                Debug.Log("[UIRayDrawingTool] Select is ACTIVE - attempting to draw");
-            }
+            bool isDrawActionActive = drawAction.action != null && drawAction.action.IsPressed();
             
             if (isDrawActionActive)
             {
                 HandleRayDrawing();
             }
-            else if (wasDrawActionActive )
+            else if (wasDrawActionActive)
             {
                 EndDrawing();
             }
 
-            wasDrawActionActive  = isDrawActionActive;
+            wasDrawActionActive = isDrawActionActive;
         }
 
 
         private void HandleRayDrawing()
         {
             bool hasHit = rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-            
-            Debug.Log($"[UIRayDrawingTool] TryGetCurrent3DRaycastHit result: {hasHit}");
-            
-            if (!hasHit)
-            {
-                Debug.LogWarning("[UIRayDrawingTool] ❌ NO HIT detected");
-                EndDrawing();
-                return;
-            }
-            
-            Debug.Log($"[UIRayDrawingTool] ✅ HIT: {hit.collider.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)} ({hit.collider.gameObject.layer})");
-            
+            if (!hasHit) { EndDrawing(); return; }
+
             DrawingSurface surface = hit.collider.GetComponent<DrawingSurface>();
-            
-            if (surface == null)
-            {
-                Debug.LogWarning($"[UIRayDrawingTool] Hit {hit.collider.name} but NO DrawingSurface component!");
-                EndDrawing();
-                return;
-            }
-            
-            Debug.Log($"[UIRayDrawingTool] DrawingSurface found on {surface.name}");
-            
             bool isOnCorrectLayer = ((1 << hit.collider.gameObject.layer) & surfaceLayerMask) != 0;
-            Debug.Log($"[UIRayDrawingTool] Layer check: {isOnCorrectLayer} (surfaceLayerMask={surfaceLayerMask.value})");
-            
+
             if (surface != null && isOnCorrectLayer)
             {
                 if (!isDrawing || currentSurface != surface)
                 {
                     if (isDrawing && currentSurface != null && currentSurface != surface)
-                    {
                         OnSurfaceExited?.Invoke(this, currentSurface);
-                    }
 
                     currentSurface = surface;
                     isDrawing = true;
-                    Debug.Log($"[UIRayDrawingTool] 🎨 DRAWING STARTED at {hit.point}");
+                    Debug.Log($"[UIRayDrawingTool] Drawing started on '{surface.name}' at {hit.point}");
                     OnSurfaceTouched?.Invoke(this, surface, hit.point);
                     PlayAudio(touchSurfaceClip);
                 }
                 else
                 {
-                    Debug.Log($"[UIRayDrawingTool] ✏️ DRAWING continue at {hit.point}");
                     OnSurfaceDraw?.Invoke(this, surface, hit.point);
                 }
             }
             else
             {
-                Debug.LogWarning("[UIRayDrawingTool] Layer check FAILED!");
+                if (!hasHit)
+                    Debug.LogWarning($"[UIRayDrawingTool] No 3D hit. Layer check={isOnCorrectLayer}, surface={surface != null}");
                 EndDrawing();
             }
         }

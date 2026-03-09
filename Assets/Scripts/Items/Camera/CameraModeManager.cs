@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using VRDrawing.Setup;
 
 namespace VRItems.Camera
 {
@@ -230,6 +231,14 @@ namespace VRItems.Camera
             }
             
             OnPhotoCaptured?.Invoke(photo);
+
+            // Store the captured photo as the pending board image and enter drawing mode
+            PendingCapturePayload.Set(photo);
+            if (VRDrawing.Mode.DrawingModeManager.Instance != null)
+            {
+                ExitCameraMode();
+                VRDrawing.Mode.DrawingModeManager.Instance.EnterDrawingMode();
+            }
             
             Debug.Log($"[CameraModeManager] Photo captured! {photo.width}x{photo.height}");
 
@@ -238,7 +247,8 @@ namespace VRItems.Camera
                 viewfinderUI.SetActive(true);
             }
             
-            Destroy(photo);
+            // Do NOT destroy photo here: PendingCapturePayload holds the reference
+            // and PhotoPlacementManager will use it once the board spawns.
         }
 
         // CHỈ Update KHI ĐANG Ở CAMERA MODE

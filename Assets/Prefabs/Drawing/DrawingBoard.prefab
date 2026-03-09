@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 912401889063043839}
+  - component: {fileID: 7826440873808230724}
   m_Layer: 0
   m_Name: DrawingBoard
   m_TagString: Untagged
@@ -33,6 +34,19 @@ Transform:
   - {fileID: 229966265563225351}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7826440873808230724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 863490137525809251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5403beb09c2e341a88b257d30f072a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Setup.AnnotationBoardSetup
+  targetSurface: {fileID: 6144303884387290206}
 --- !u!1 &3935674507642259274
 GameObject:
   m_ObjectHideFlags: 0
@@ -121,6 +135,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6152296206693048144
 GameObject:
@@ -215,5 +230,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Rendering.MeshStrokeRenderer
   strokeMaterial: {fileID: 2100000, guid: e0e4b6ab8276a074bb76b958b6468c1c, type: 2}
-  segmentsPerUnit: 100
   smoothNormals: 1
