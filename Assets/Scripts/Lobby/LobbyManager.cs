@@ -250,8 +250,6 @@ namespace Lobby
         {
             if (statusText != null)
                 statusText.text = message;
-
-            Debug.Log($"[LobbyManager] {message}");
         }
 
         #endregion
