@@ -10,7 +10,7 @@ namespace Core
     /// </summary>
     public class PlayerSpawner : MonoBehaviourPunCallbacks
     {
-        private const string DefaultPrefabName = "NetworkPlayer";
+        private const string DefaultPrefabName = "VRNetworkPlayer";
 
         [Header("Spawn Settings")]
         [Tooltip("Name of the prefab inside a Resources folder to instantiate over the network.")]
@@ -56,10 +56,7 @@ namespace Core
         private void SpawnPlayer()
         {
             Vector3 position = ChooseSpawnPosition();
-            Quaternion rotation = Quaternion.identity;
-
-            spawnedPlayer = PhotonNetwork.Instantiate(playerPrefabName, position, rotation);
-            Debug.Log($"[PlayerSpawner] Spawned '{playerPrefabName}' at {position} for player '{PhotonNetwork.NickName}'.");
+            spawnedPlayer = PhotonNetwork.Instantiate(playerPrefabName, position, Quaternion.identity);
         }
 
         private Vector3 ChooseSpawnPosition()

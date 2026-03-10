@@ -5,24 +5,26 @@ using UnityEngine;
 namespace Core
 {
     /// <summary>
-    /// Drives the NetworkPlayer transform from the local XR Origin every frame.
-    /// Only runs logic on the owner client (photonView.IsMine).
-    /// Remote clients receive updated transforms via PhotonTransformView (PUN).
+    /// Drives only the IK target transforms (Head Target, Left Arm_target, Right Arm_target)
+    /// from the local XR Origin each frame for the owner client.
     ///
-    /// Body root follows the Main Camera's world XZ position (floor-projected),
-    /// so the avatar stays grounded even when the headset tilts.
-    /// Head child mirrors the camera's full world position and rotation.
+    /// Body root positioning is delegated to IKTargetFollowVRRig (local)
+    /// or PhotonTransformView (remote). This script does NOT touch transform.position.
+    ///
+    /// Remote clients receive IK target world positions via PhotonTransformView on each target child.
     /// </summary>
     [RequireComponent(typeof(PhotonView))]
     public class NetworkPlayerSync : MonoBehaviourPun
     {
-        [Header("Avatar Parts to Drive")]
-        [Tooltip("Child transform representing the head — follows Main Camera full transform.")]
-        [SerializeField] private Transform headTransform;
+        [Header("IK Targets to Drive (local player only)")]
+        [SerializeField] private Transform headIKTarget;
+        [SerializeField] private Transform leftHandIKTarget;
+        [SerializeField] private Transform rightHandIKTarget;
 
-        // Cached references — resolved once in Start
         private XROrigin xrOrigin;
         private Transform cameraTransform;
+        private Transform leftControllerTransform;
+        private Transform rightControllerTransform;
 
         private void Start()
         {
@@ -37,72 +39,67 @@ namespace Core
             if (!photonView.IsMine || xrOrigin == null || cameraTransform == null)
                 return;
 
-            SyncBodyToCamera();
-            SyncHeadToCamera();
+            SyncHeadIKTarget();
+            SyncHandIKTargets();
         }
 
-        // ─────────────────────────────────────────────────────────────
-        #region Sync
-
-        /// <summary>
-        /// Positions the NetworkPlayer root at the camera's world XZ, clamped to the XR Origin's Y floor.
-        /// Yaw matches the camera's horizontal look direction.
-        /// </summary>
-        private void SyncBodyToCamera()
+        private void SyncHeadIKTarget()
         {
-            // Use camera world position for XZ, XR Origin Y for floor grounding
-            Vector3 camPos = cameraTransform.position;
-            float floorY = xrOrigin.transform.position.y;
-
-            transform.position = new Vector3(camPos.x, floorY, camPos.z);
-
-            // Yaw-only rotation from camera forward projected onto XZ plane
-            Vector3 forward = cameraTransform.forward;
-            forward.y = 0f;
-            if (forward.sqrMagnitude > 0.001f)
-                transform.rotation = Quaternion.LookRotation(forward, Vector3.up);
+            if (headIKTarget == null) return;
+            headIKTarget.position = cameraTransform.position;
+            headIKTarget.rotation = cameraTransform.rotation;
         }
 
-        /// <summary>Matches the Head child full world position and rotation to the Main Camera.</summary>
-        private void SyncHeadToCamera()
+        private void SyncHandIKTargets()
         {
-            if (headTransform == null)
-                return;
+            if (leftHandIKTarget != null && leftControllerTransform != null)
+            {
+                leftHandIKTarget.position = leftControllerTransform.position;
+                leftHandIKTarget.rotation = leftControllerTransform.rotation;
+            }
 
-            headTransform.position = cameraTransform.position;
-            headTransform.rotation = cameraTransform.rotation;
+            if (rightHandIKTarget != null && rightControllerTransform != null)
+            {
+                rightHandIKTarget.position = rightControllerTransform.position;
+                rightHandIKTarget.rotation = rightControllerTransform.rotation;
+            }
         }
 
-        #endregion
-
-        // ─────────────────────────────────────────────────────────────
-        #region Setup
-
-        /// <summary>Finds the XROrigin and Main Camera in the scene at runtime.</summary>
         private void ResolveXRReferences()
         {
             xrOrigin = FindAnyObjectByType<XROrigin>();
             if (xrOrigin == null)
             {
-                Debug.LogError("[NetworkPlayerSync] XROrigin not found in scene. Avatar will not sync.");
+                Debug.LogError("[NetworkPlayerSync] XROrigin not found in scene.");
                 return;
             }
 
             Camera mainCam = xrOrigin.Camera;
             if (mainCam == null)
             {
-                Debug.LogError("[NetworkPlayerSync] XROrigin.Camera is null. Head will not sync.");
+                Debug.LogError("[NetworkPlayerSync] XROrigin.Camera is null.");
                 return;
             }
 
             cameraTransform = mainCam.transform;
-            Debug.Log(
-                $"[NetworkPlayerSync] Resolved XROrigin '{xrOrigin.name}' at {xrOrigin.transform.position}\n" +
-                $"  Camera: '{cameraTransform.name}' world pos: {cameraTransform.position}\n" +
-                $"  Camera local pos: {cameraTransform.localPosition}"
-            );
+
+            Transform cameraOffset = xrOrigin.CameraFloorOffsetObject != null
+                ? xrOrigin.CameraFloorOffsetObject.transform
+                : xrOrigin.transform;
+
+            leftControllerTransform  = FindChildByName(cameraOffset, "LeftHandController");
+            rightControllerTransform = FindChildByName(cameraOffset, "RightHandController");
         }
 
-        #endregion
+        private static Transform FindChildByName(Transform parent, string childName)
+        {
+            if (parent.name == childName) return parent;
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                Transform found = FindChildByName(parent.GetChild(i), childName);
+                if (found != null) return found;
+            }
+            return null;
+        }
     }
 }
