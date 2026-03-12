@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb1517ae026c4a389826b8a8cdb5c2e0, type: 3}
   m_Name: GsplatSettings
   m_EditorClassIdentifier: Gsplat::Gsplat.GsplatSettings
-  Shader: {fileID: 4800000, guid: 37be4d9e326b8db49996c5c89f7854dd, type: 3}
   ComputeShader: {fileID: 7200000, guid: 0aa082656a496ff4f82ecc9d720802b8, type: 3}
   SplatInstanceSize: 128
+  UploadBatchSize: 100000
   ShowImportErrors: 1
+  Materials:
+  - {fileID: 11400000, guid: 52d6acd34c7b8c8458e1547991be8d7b, type: 2}
+  - {fileID: 11400000, guid: 4c970957deb11c343ac0f56e028a96b6, type: 2}
+  m_version: 1.2.0

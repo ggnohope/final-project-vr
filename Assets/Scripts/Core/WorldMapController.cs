@@ -17,6 +17,7 @@ namespace Core
 
         [Header("References")]
         [SerializeField] private GsplatSceneLoader sceneLoader;
+        [SerializeField] private NetworkedMapSync networkedMapSync;
         [SerializeField] private Canvas worldMapCanvas;
         [SerializeField] private MapTileRenderer tileRenderer;
 
@@ -34,6 +35,9 @@ namespace Core
         {
             if (sceneLoader == null)
                 sceneLoader = FindFirstObjectByType<GsplatSceneLoader>();
+
+            if (networkedMapSync == null)
+                networkedMapSync = FindFirstObjectByType<NetworkedMapSync>();
         }
 
         /// <summary>Loads the given region with click feedback. Called by MapHotspotNavigator on confirm.</summary>
@@ -66,7 +70,12 @@ namespace Core
             if (ItemBarController.Instance != null)
                 ItemBarController.Instance.DisableUIRay();
 
-            sceneLoader.LoadScene(region.regionId, region.plyAssetPath, region.cameraConfig);
+            // Route through NetworkedMapSync so the selection is broadcast to all players.
+            // Falls back to direct load when offline.
+            if (networkedMapSync != null)
+                networkedMapSync.RequestLoadRegion(region.regionId);
+            else
+                sceneLoader.LoadScene(region.regionId, region.plyAssetPath, region.cameraConfig);
         }
 
         /// <summary>Makes the world map canvas visible.</summary>
