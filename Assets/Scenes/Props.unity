@@ -3802,6 +3802,7 @@ GameObject:
   - component: {fileID: 249434818}
   - component: {fileID: 249434817}
   - component: {fileID: 249434816}
+  - component: {fileID: 249434819}
   m_Layer: 0
   m_Name: GaussianSplattingManager
   m_TagString: Untagged
@@ -3840,8 +3841,7 @@ MonoBehaviour:
   GsplatAsset: {fileID: 0}
   SHDegree: 3
   GammaToLinear: 1
-  AsyncUpload: 0
-  UploadBatchSize: 100000
+  AsyncUpload: 1
   RenderBeforeUploadComplete: 1
 --- !u!4 &249434818
 Transform:
@@ -3858,6 +3858,20 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 180, y: 0, z: 0}
+--- !u!114 &249434819
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249434815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 565156d6c8f9f5c42826bfe73ef54b46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.NetworkedMapSync
+  sceneMapData: {fileID: 11400000, guid: e91aa1a5dc7de3544866ef2e75d3dcce, type: 2}
+  sceneLoader: {fileID: 249434816}
 --- !u!1 &259033782
 GameObject:
   m_ObjectHideFlags: 0
@@ -10954,6 +10968,14 @@ PrefabInstance:
       objectReference: {fileID: 249434816}
     - target: {fileID: 4238718387158126909, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
       propertyPath: tileRenderer
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4238718387158126909, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
+      propertyPath: networkedMapSync
+      value: 
+      objectReference: {fileID: 249434819}
+    - target: {fileID: 4238718387158126909, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
+      propertyPath: networkRegionSync
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 5206408411666185897, guid: aa47a010b9ed37a4fa6c77d54bf71576, type: 3}
@@ -42325,6 +42347,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1370062891}
     m_Modifications:
+    - target: {fileID: 321826215288954264, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.596
+      objectReference: {fileID: 0}
     - target: {fileID: 722429959868069130, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
       propertyPath: m_Data.m_Mid
       value: 
@@ -42425,6 +42451,30 @@ PrefabInstance:
       propertyPath: m_Data.m_Root
       value: 
       objectReference: {fileID: 1502482011}
+    - target: {fileID: 5643723024147737525, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.865
+      objectReference: {fileID: 0}
+    - target: {fileID: 5643723024147737525, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.463
+      objectReference: {fileID: 0}
+    - target: {fileID: 5959983056927518593, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.557
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161671927198012763, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.629
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161671927198012763, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.951
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161671927198012763, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.463
+      objectReference: {fileID: 0}
     - target: {fileID: 8484131505713375406, guid: 8d63960e615d47d48a8b2733afce2c29, type: 3}
       propertyPath: m_Data.m_ConstrainedObject
       value: 
