@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63661a838d468344faec183ae6f53241, type: 3}
+  m_Name: Symbol_Sa
+  m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Geology.GeologicalSymbolDefinition
+  id: Sa
+  label: Sa
+  fullName: Sandstone
+  category: 2
+  displayColor: {r: 0.9, g: 0.75, b: 0.5, a: 1}
+  icon: {fileID: 0}
+  description: Sedimentary rock composed of sand-sized grains cemented together.

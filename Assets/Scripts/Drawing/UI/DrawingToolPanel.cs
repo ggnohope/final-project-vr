@@ -28,15 +28,23 @@ namespace VRDrawing.UI
 
         private ToolType currentToolType = ToolType.Pen;
         private Color currentColor = Color.black;
-        private float currentThickness = 0.001f;
+
+        // Initialised to midpoint — overwritten once the slider is set up.
+        private float currentThickness;
 
         private void Awake()
         {
             SetupButtons();
             SetupColorButtons();
             SetupThicknessSlider();
-            
             UpdateCurrentToolDisplay();
+        }
+
+        private void Start()
+        {
+            // Push the initial midpoint thickness to all tools and symbol renderers
+            // after all MonoBehaviours have finished their Awake().
+            NotifyThicknessChange();
         }
 
         private void SetupButtons()
@@ -88,7 +96,11 @@ namespace VRDrawing.UI
 
             thicknessSlider.minValue = minThickness;
             thicknessSlider.maxValue = maxThickness;
+
+            // Default to the midpoint so both pen and symbol start at a balanced size.
+            currentThickness = (minThickness + maxThickness) * 0.5f;
             thicknessSlider.value = currentThickness;
+
             thicknessSlider.onValueChanged.AddListener(SetThickness);
         }
 
@@ -105,6 +117,9 @@ namespace VRDrawing.UI
             UpdateCurrentToolDisplay();
             NotifyColorChange();
         }
+
+        /// <summary>Returns the current raw thickness value from the slider.</summary>
+        public float CurrentThickness => currentThickness;
 
         private void SetThickness(float thickness)
         {
@@ -177,9 +192,13 @@ namespace VRDrawing.UI
         {
             DrawingToolBase[] tools = FindObjectsByType<DrawingToolBase>(FindObjectsSortMode.None);
             foreach (var tool in tools)
-            {
                 tool.SetThickness(currentThickness);
-            }
+
+            // Sync symbol size so SymbolOverlayRenderer reflects the same slider value.
+            VRDrawing.Geology.SymbolOverlayRenderer[] renderers =
+                FindObjectsByType<VRDrawing.Geology.SymbolOverlayRenderer>(FindObjectsSortMode.None);
+            foreach (var r in renderers)
+                r.SetSymbolSize(currentThickness);
         }
 
         private DrawingSurface GetActiveDrawingSurface()

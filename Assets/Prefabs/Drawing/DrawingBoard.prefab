@@ -121,6 +121,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!1 &6152296206693048144
 GameObject:
@@ -134,6 +135,7 @@ GameObject:
   - component: {fileID: 9133474717917120714}
   - component: {fileID: 6144303884387290206}
   - component: {fileID: 5636618232604867390}
+  - component: {fileID: 9074044314920767667}
   m_Layer: 3
   m_Name: DrawingSurface
   m_TagString: Untagged
@@ -215,5 +217,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Rendering.MeshStrokeRenderer
   strokeMaterial: {fileID: 2100000, guid: e0e4b6ab8276a074bb76b958b6468c1c, type: 2}
-  segmentsPerUnit: 100
   smoothNormals: 1
+--- !u!114 &9074044314920767667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6152296206693048144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6deb7545cc7646d40a0881539b9283e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Geology.SymbolOverlayRenderer
+  overlayMaterialTemplate: {fileID: 0}
+  labelFont: {fileID: 0}
+  overlayAlpha: 0.5
+  labelAlpha: 0.5
+  thicknessToSizeMultiplier: 4
+  minSymbolSize: 0.004
+  maxSymbolSize: 0.04
+  circleSegments: 32
+  drawSpacing: 0.03

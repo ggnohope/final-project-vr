@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dcec40da62744be4681fc03cb992786f, type: 3}
+  m_Name: GeologicalSymbolDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::VRDrawing.Geology.GeologicalSymbolDatabase
+  symbols:
+  - {fileID: 11400000, guid: 683819b748bb648458461050df7864ee, type: 2}
+  - {fileID: 11400000, guid: 22f63c3001fd8604e9664acf87a918f5, type: 2}
+  - {fileID: 11400000, guid: e08047d19baea4c43977e80bef42e4c5, type: 2}
+  - {fileID: 11400000, guid: 5cbb2c0f0c30187498d5b370ef15f722, type: 2}
+  - {fileID: 11400000, guid: 2eb825d2c59d8a641a46b6a8622395e6, type: 2}
+  - {fileID: 11400000, guid: 0e295b1812808154c9dcef5e1beedb9c, type: 2}
+  - {fileID: 11400000, guid: 7c0ab9e4838943645adf4b9dfadafa33, type: 2}
+  - {fileID: 11400000, guid: 7f2cb1782285e044e9b97544eb7d1ef2, type: 2}
+  - {fileID: 11400000, guid: aad2743b869afe64ebd647ba211c7004, type: 2}
+  - {fileID: 11400000, guid: 04a939154b259dc468cfe1695dd7cf10, type: 2}
+  - {fileID: 11400000, guid: 9ee43950ff927ad41859b6e2250228ca, type: 2}
+  - {fileID: 11400000, guid: 9f71157d7c561ec4c8c183d0be07509c, type: 2}
+  - {fileID: 11400000, guid: 8c5ed544d68d3764ab27b43636c68787, type: 2}
+  - {fileID: 11400000, guid: 3019826d30e1c9946b8f2ecf755ddbad, type: 2}
+  - {fileID: 11400000, guid: a205d954277e20944b63919a2988523c, type: 2}
+  - {fileID: 11400000, guid: 5b6290050cf867e469688d1ef79eedd8, type: 2}
+  - {fileID: 11400000, guid: ede1946020657d74e82a504a1b9c594e, type: 2}

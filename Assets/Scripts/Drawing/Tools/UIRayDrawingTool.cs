@@ -77,84 +77,52 @@ namespace VRDrawing.Tools
         private void Update()
         {
             if (!isEnabled || rayInteractor == null)
-            {
-                Debug.LogWarning($"[UIRayDrawingTool] Update() RETURN EARLY: isEnabled={isEnabled}, rayInteractor={rayInteractor != null}");
                 return;
-            }
 
-            if (VRDrawing.Photo.PhotoPlacementManager.Instance != null && 
+            if (VRDrawing.Photo.PhotoPlacementManager.Instance != null &&
                 VRDrawing.Photo.PhotoPlacementManager.Instance.IsInPlacementMode)
             {
-                Debug.Log("[UIRayDrawingTool] ⏸️ Skipping drawing - Photo Placement Mode active");
-                
-                // End current drawing nếu đang vẽ
                 if (isDrawing)
-                {
                     EndDrawing();
-                }
-                
+
                 return;
             }
 
-            bool isDrawActionActive = false;
-            // Debug.Log("isDrawActionActive" + isDrawActionActive);
-            if (drawAction.action != null)
-            {
-                isDrawActionActive = drawAction.action.IsPressed();
-            }
-            // if (Input.GetKey(KeyCode.Space))
-            // {
-            //     isDrawActionActive = true;
-            //     Debug.Log("[UIRayDrawingTool] 🎮 SIMULATING SELECT with SPACE key");
-            // }
-            // DEBUG: Log every frame when select is active
-            if (isDrawActionActive)
-            {
-                Debug.Log("[UIRayDrawingTool] Select is ACTIVE - attempting to draw");
-            }
-            
+            bool isDrawActionActive = drawAction.action != null && drawAction.action.IsPressed();
+
             if (isDrawActionActive)
             {
                 HandleRayDrawing();
             }
-            else if (wasDrawActionActive )
+            else if (wasDrawActionActive)
             {
                 EndDrawing();
             }
 
-            wasDrawActionActive  = isDrawActionActive;
+            wasDrawActionActive = isDrawActionActive;
         }
 
 
         private void HandleRayDrawing()
         {
             bool hasHit = rayInteractor.TryGetCurrent3DRaycastHit(out RaycastHit hit);
-            
-            Debug.Log($"[UIRayDrawingTool] TryGetCurrent3DRaycastHit result: {hasHit}");
-            
+
             if (!hasHit)
             {
-                Debug.LogWarning("[UIRayDrawingTool] ❌ NO HIT detected");
                 EndDrawing();
                 return;
             }
-            
-            Debug.Log($"[UIRayDrawingTool] ✅ HIT: {hit.collider.name}, Layer: {LayerMask.LayerToName(hit.collider.gameObject.layer)} ({hit.collider.gameObject.layer})");
-            
+
             DrawingSurface surface = hit.collider.GetComponent<DrawingSurface>();
-            
+
             if (surface == null)
             {
-                Debug.LogWarning($"[UIRayDrawingTool] Hit {hit.collider.name} but NO DrawingSurface component!");
                 EndDrawing();
                 return;
             }
-            
-            Debug.Log($"[UIRayDrawingTool] DrawingSurface found on {surface.name}");
-            
+
             bool isOnCorrectLayer = ((1 << hit.collider.gameObject.layer) & surfaceLayerMask) != 0;
-            Debug.Log($"[UIRayDrawingTool] Layer check: {isOnCorrectLayer} (surfaceLayerMask={surfaceLayerMask.value})");
-            
+
             if (surface != null && isOnCorrectLayer)
             {
                 if (!isDrawing || currentSurface != surface)
@@ -166,19 +134,16 @@ namespace VRDrawing.Tools
 
                     currentSurface = surface;
                     isDrawing = true;
-                    Debug.Log($"[UIRayDrawingTool] 🎨 DRAWING STARTED at {hit.point}");
                     OnSurfaceTouched?.Invoke(this, surface, hit.point);
                     PlayAudio(touchSurfaceClip);
                 }
                 else
                 {
-                    Debug.Log($"[UIRayDrawingTool] ✏️ DRAWING continue at {hit.point}");
                     OnSurfaceDraw?.Invoke(this, surface, hit.point);
                 }
             }
             else
             {
-                Debug.LogWarning("[UIRayDrawingTool] Layer check FAILED!");
                 EndDrawing();
             }
         }
@@ -188,7 +153,6 @@ namespace VRDrawing.Tools
         {
             if (isDrawing && currentSurface != null)
             {
-                Debug.Log($"[UIRayDrawingTool] ❌ DRAWING ENDED");
                 OnSurfaceExited?.Invoke(this, currentSurface);
                 isDrawing = false;
                 currentSurface = null;
@@ -209,7 +173,6 @@ namespace VRDrawing.Tools
         public override void SetColor(Color color)
         {
             SetDrawColor(color);
-            Debug.Log($"[UIRayDrawingTool] ✅ SetColor called! New color: {color} (R:{color.r}, G:{color.g}, B:{color.b})");
         }
 
         public override void SetThickness(float thickness)
@@ -220,15 +183,30 @@ namespace VRDrawing.Tools
         public override void SetEnabled(bool enabled)
         {
             isEnabled = enabled;
-            // CRITICAL: UIRayDrawingTool must not deactivate the GameObject
-            // because it's attached to the UI Ray Interactor, not a grabbable tool.
-            // Only set the isEnabled flag to control Update() execution.
-            Debug.Log($"[UIRayDrawingTool] SetEnabled({enabled})");
-            
+
             if (!enabled)
             {
                 EndDrawing();
             }
+        }
+
+        /// <summary>
+        /// Returns true on the frame the draw/select action was first pressed.
+        /// Used by SymbolOverlayRenderer to detect single-click placement without
+        /// consuming the action from the drawing pipeline.
+        /// </summary>
+        public bool IsSelectPressed()
+        {
+            return drawAction.action != null && drawAction.action.WasPressedThisFrame();
+        }
+
+        /// <summary>
+        /// Returns true every frame the draw/select action is held down.
+        /// Used by SymbolOverlayRenderer for continuous symbol painting.
+        /// </summary>
+        public bool IsSelectHeld()
+        {
+            return drawAction.action != null && drawAction.action.IsPressed();
         }
 
         public void SetToolType(ToolType type)

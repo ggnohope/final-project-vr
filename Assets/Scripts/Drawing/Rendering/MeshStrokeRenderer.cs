@@ -10,6 +10,12 @@ namespace VRDrawing.Rendering
         [SerializeField] private Material strokeMaterial;
         [SerializeField] private bool smoothNormals = true;
 
+        /// <summary>
+        /// How far in front of the drawing surface (and photo) the ink strokes are rendered.
+        /// Must be greater than photoOffsetFromSurface in PhotoPlacementManager (default 0.001).
+        /// </summary>
+        private const float StrokeZOffset = -0.002f;
+
         private DrawingSurface surface;
         private MeshFilter meshFilter;
         private MeshRenderer meshRenderer;
@@ -22,15 +28,11 @@ namespace VRDrawing.Rendering
 
             meshFilter = GetComponent<MeshFilter>();
             if (meshFilter == null)
-            {
                 meshFilter = gameObject.AddComponent<MeshFilter>();
-            }
 
             meshRenderer = GetComponent<MeshRenderer>();
             if (meshRenderer == null)
-            {
                 meshRenderer = gameObject.AddComponent<MeshRenderer>();
-            }
 
             if (strokeMaterial == null)
             {
@@ -42,16 +44,16 @@ namespace VRDrawing.Rendering
             meshRenderer.material = strokeMaterial;
             meshRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             meshRenderer.receiveShadows = false;
-            
+
+            // Render ink on top of the photo quad (sortingOrder 100)
+            meshRenderer.sortingLayerName = "Default";
+            meshRenderer.sortingOrder = 200;
+
             int surfaceLayer = surface.gameObject.layer;
             gameObject.layer = surfaceLayer;
-            
+
             if (transform.parent != surface.transform)
-            {
                 transform.SetParent(surface.transform, false);
-            }
-            
-            Debug.Log($"[MeshStrokeRenderer] Initialize: GameObject={gameObject.name}, Layer={surfaceLayer} ({LayerMask.LayerToName(surfaceLayer)}), Parent={transform.parent?.name}");
 
             combinedMesh = new Mesh();
             combinedMesh.name = "DrawingMesh";
@@ -62,114 +64,58 @@ namespace VRDrawing.Rendering
 
         public override void RebuildAllStrokes(DrawingData data)
         {
-            Debug.Log($"[MeshStrokeRenderer] RebuildAllStrokes START: data.strokes.Count={data?.strokes.Count}");
-            
             if (!isInitialized || data == null)
-            {
-                Debug.LogWarning($"[MeshStrokeRenderer] Cannot rebuild: initialized={isInitialized}, data={data != null}");
                 return;
-            }
 
             ClearAllStrokes();
 
             if (data.strokes.Count == 0)
-            {
-                Debug.LogWarning("[MeshStrokeRenderer] No strokes to rebuild!");
                 return;
-            }
 
             List<CombineInstance> combines = new List<CombineInstance>();
 
             foreach (var stroke in data.strokes)
             {
-                Debug.Log($"[MeshStrokeRenderer] Processing stroke: points={stroke.points.Count}, isValid={stroke.IsValid()}, color={stroke.color}, width={stroke.width}");
-                
                 if (!stroke.IsValid()) continue;
 
                 Mesh strokeMesh = GenerateStrokeMesh(stroke);
                 if (strokeMesh != null && strokeMesh.vertexCount > 0)
                 {
-                    Debug.Log($"[MeshStrokeRenderer] Generated mesh: vertices={strokeMesh.vertexCount}, triangles={strokeMesh.triangles.Length}, bounds={strokeMesh.bounds}");
-                    
                     CombineInstance ci = new CombineInstance();
                     ci.mesh = strokeMesh;
                     ci.transform = Matrix4x4.identity;
                     combines.Add(ci);
                 }
-                else
-                {
-                    Debug.LogWarning($"[MeshStrokeRenderer] Failed to generate mesh for stroke!");
-                }
             }
 
             if (combines.Count > 0)
             {
-                Debug.Log($"[MeshStrokeRenderer] Combining {combines.Count} meshes...");
                 combinedMesh.CombineMeshes(combines.ToArray(), true, false);
                 combinedMesh.RecalculateBounds();
-                
-                Debug.Log($"[MeshStrokeRenderer] Combined mesh: vertices={combinedMesh.vertexCount}, triangles={combinedMesh.triangles.Length}, bounds={combinedMesh.bounds}");
 
                 if (smoothNormals)
-                {
                     combinedMesh.RecalculateNormals();
-                }
-                
-                // QUAN TRỌNG: Kiểm tra MeshFilter
-                if (meshFilter != null && meshFilter.sharedMesh != null)
-                {
-                    Debug.Log($"[MeshStrokeRenderer] ✅ MeshFilter.sharedMesh assigned! vertices={meshFilter.sharedMesh.vertexCount}");
-                }
-                else
-                {
-                    Debug.LogError($"[MeshStrokeRenderer] ❌ MeshFilter or mesh is NULL!");
-                }
-                
-                // QUAN TRỌNG: Kiểm tra MeshRenderer
-                if (meshRenderer != null && meshRenderer.enabled)
-                {
-                    Debug.Log($"[MeshStrokeRenderer] ✅ MeshRenderer enabled! material={meshRenderer.sharedMaterial?.name}");
-                }
-                else
-                {
-                    Debug.LogError($"[MeshStrokeRenderer] ❌ MeshRenderer disabled or NULL!");
-                }
-            }
-            else
-            {
-                Debug.LogWarning("[MeshStrokeRenderer] No valid meshes to combine!");
             }
 
             foreach (var ci in combines)
             {
                 if (ci.mesh != null)
-                {
                     Destroy(ci.mesh);
-                }
             }
         }
 
-
         public override void UpdateStroke(Stroke stroke)
         {
-            Debug.Log($"[MeshStrokeRenderer] UpdateStroke called! stroke.points.Count={stroke?.points.Count}");
-            
             if (!isInitialized || surface == null || surface.Data == null)
-            {
-                Debug.LogWarning($"[MeshStrokeRenderer] Cannot update: initialized={isInitialized}, surface={surface != null}, data={surface?.Data != null}");
                 return;
-            }
-            
+
             RebuildAllStrokes(surface.Data);
-            Debug.Log($"[MeshStrokeRenderer] RebuildAllStrokes completed");
         }
 
         public override void ClearAllStrokes()
         {
             if (combinedMesh != null)
-            {
                 combinedMesh.Clear();
-            }
         }
 
         private Mesh GenerateStrokeMesh(Stroke stroke)
@@ -188,39 +134,35 @@ namespace VRDrawing.Rendering
                 Vector3 worldPos = surface.SurfaceUVToWorld(stroke.points[i].uv);
                 Vector3 localPos = transform.InverseTransformPoint(worldPos);
 
+                // Push strokes in front of the photo layer
+                localPos.z = StrokeZOffset;
+
                 Vector3 forward = Vector3.forward;
                 if (i < stroke.points.Count - 1)
                 {
                     Vector3 nextWorldPos = surface.SurfaceUVToWorld(stroke.points[i + 1].uv);
                     Vector3 nextLocalPos = transform.InverseTransformPoint(nextWorldPos);
+                    nextLocalPos.z = StrokeZOffset;
                     forward = (nextLocalPos - localPos).normalized;
                     if (forward.sqrMagnitude < 0.001f)
-                    {
                         forward = Vector3.forward;
-                    }
                 }
                 else if (i > 0)
                 {
                     Vector3 prevWorldPos = surface.SurfaceUVToWorld(stroke.points[i - 1].uv);
                     Vector3 prevLocalPos = transform.InverseTransformPoint(prevWorldPos);
+                    prevLocalPos.z = StrokeZOffset;
                     forward = (localPos - prevLocalPos).normalized;
                     if (forward.sqrMagnitude < 0.001f)
-                    {
                         forward = Vector3.forward;
-                    }
                 }
 
                 Vector3 right = Vector3.Cross(Vector3.back, forward).normalized;
                 if (right.sqrMagnitude < 0.001f)
-                {
                     right = Vector3.right;
-                }
 
-                Vector3 left = localPos - right * halfWidth;
-                Vector3 rightPos = localPos + right * halfWidth;
-
-                vertices.Add(left);
-                vertices.Add(rightPos);
+                vertices.Add(localPos - right * halfWidth);
+                vertices.Add(localPos + right * halfWidth);
 
                 colors.Add(stroke.color);
                 colors.Add(stroke.color);
@@ -228,7 +170,6 @@ namespace VRDrawing.Rendering
                 if (i < stroke.points.Count - 1)
                 {
                     int baseIndex = i * 2;
-                    
                     triangles.Add(baseIndex);
                     triangles.Add(baseIndex + 2);
                     triangles.Add(baseIndex + 1);
@@ -251,9 +192,7 @@ namespace VRDrawing.Rendering
         private void OnDestroy()
         {
             if (combinedMesh != null)
-            {
                 Destroy(combinedMesh);
-            }
         }
     }
 }

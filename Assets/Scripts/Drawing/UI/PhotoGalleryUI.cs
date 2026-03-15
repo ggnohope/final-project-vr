@@ -22,7 +22,6 @@ namespace VRDrawing.UI
         [SerializeField] private float panelDistance = 1.0f;
         [SerializeField] private float panelHeight = 0.2f;
         [SerializeField] private bool repositionOnOpen = true;
-        
 
         private List<GameObject> photoButtons = new List<GameObject>();
         public static PhotoGalleryUI Instance { get; private set; }
@@ -99,7 +98,9 @@ namespace VRDrawing.UI
         private void OpenGallery()
         {
             isGalleryOpen = true;
-            
+
+            SetDrawingToolEnabled(false);
+
             if (galleryPanel != null)
             {
                 PositionPanelInFrontOfCamera();
@@ -107,20 +108,36 @@ namespace VRDrawing.UI
             }
 
             RefreshGallery();
-            
-            Debug.Log("[PhotoGalleryUI] Gallery opened");
+
+            Debug.Log("[PhotoGalleryUI] Gallery opened — drawing tool disabled.");
         }
 
         private void CloseGallery()
         {
             isGalleryOpen = false;
-            
+
             if (galleryPanel != null)
             {
                 galleryPanel.SetActive(false);
             }
 
-            Debug.Log("[PhotoGalleryUI] Gallery closed");
+            SetDrawingToolEnabled(true);
+
+            Debug.Log("[PhotoGalleryUI] Gallery closed — drawing tool re-enabled.");
+        }
+
+        /// <summary>
+        /// Enables or disables the UIRayDrawingTool so it does not draw while the gallery is open.
+        /// </summary>
+        private void SetDrawingToolEnabled(bool enabled)
+        {
+            VRDrawing.Tools.UIRayDrawingTool drawingTool =
+                FindFirstObjectByType<VRDrawing.Tools.UIRayDrawingTool>();
+
+            if (drawingTool != null)
+            {
+                drawingTool.SetEnabled(enabled);
+            }
         }
 
         private void PositionPanelInFrontOfCamera()
@@ -138,7 +155,7 @@ namespace VRDrawing.UI
             Vector3 forward = playerCamera.transform.forward;
             forward.y = 0f;
             forward.Normalize();
-
+ 
             Vector3 targetPosition = playerCamera.transform.position + forward * panelDistance + Vector3.up * panelHeight;
             
             galleryPanel.transform.position = targetPosition;

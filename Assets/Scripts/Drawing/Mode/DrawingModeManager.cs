@@ -4,6 +4,7 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors.Visuals;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 using UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion;
 
 namespace VRDrawing.Mode
 {
@@ -27,6 +28,9 @@ namespace VRDrawing.Mode
         [SerializeField] private TeleportationProvider teleportationProvider;
         [SerializeField] private ContinuousMoveProvider continuousMoveProvider;
         [SerializeField] private ContinuousTurnProvider continuousTurnProvider;
+
+        // Fallback: any LocomotionProvider-derived components found in scene
+        private LocomotionProvider[] allLocomotionProviders;
         [SerializeField] private Transform xrOrigin;
 
         [Header("UI Ray Settings")]
@@ -35,6 +39,13 @@ namespace VRDrawing.Mode
 
         [Header("Other References")]
         [SerializeField] private Transform playerCamera;
+
+        [Header("Annotation Canvases")]
+        [SerializeField] private GameObject symbolPaletteCanvasPrefab;
+        [SerializeField] private GameObject annotationLegendCanvasPrefab;
+
+        private GameObject activeSymbolPaletteCanvas;
+        private GameObject activeAnnotationLegendCanvas;
 
         [Header("Cached Components")]
         private VRDrawing.Tools.UIRayDrawingTool cachedUIRayDrawingTool;
@@ -105,19 +116,16 @@ namespace VRDrawing.Mode
         private void AutoFindLocomotionComponents()
         {
             if (teleportationProvider == null)
-            {
                 teleportationProvider = FindFirstObjectByType<TeleportationProvider>();
-            }
 
             if (continuousMoveProvider == null)
-            {
                 continuousMoveProvider = FindFirstObjectByType<ContinuousMoveProvider>();
-            }
 
             if (continuousTurnProvider == null)
-            {
                 continuousTurnProvider = FindFirstObjectByType<ContinuousTurnProvider>();
-            }
+
+            // Cache ALL locomotion providers as fallback for DynamicMoveProvider / SnapTurnProvider etc.
+            allLocomotionProviders = FindObjectsByType<LocomotionProvider>(FindObjectsSortMode.None);
         }
 
         public void EnterDrawingMode()
@@ -130,6 +138,7 @@ namespace VRDrawing.Mode
             DisableLocomotion();
             SpawnDrawingBoard();
             ShowToolPanel();
+            SpawnAnnotationCanvases();
             EnableAllDrawingComponents();
 
             OnDrawingModeEntered?.Invoke();
@@ -142,6 +151,7 @@ namespace VRDrawing.Mode
             isInDrawingMode = false;
 
             HideToolPanel();
+            DespawnAnnotationCanvases();
             DespawnDrawingBoard();
             EnableLocomotion();
             UnlockUserPosition();
@@ -204,38 +214,68 @@ namespace VRDrawing.Mode
 
         private void DisableLocomotion()
         {
-            if (teleportationProvider != null)
-            {
-                teleportationProvider.enabled = false;
-            }
+            if (teleportationProvider != null) teleportationProvider.enabled = false;
+            if (continuousMoveProvider != null) continuousMoveProvider.enabled = false;
+            if (continuousTurnProvider != null) continuousTurnProvider.enabled = false;
 
-            if (continuousMoveProvider != null)
-            {
-                continuousMoveProvider.enabled = false;
-            }
-
-            if (continuousTurnProvider != null)
-            {
-                continuousTurnProvider.enabled = false;
-            }
+            // Disable any additional locomotion providers (e.g. DynamicMoveProvider, SnapTurnProvider)
+            if (allLocomotionProviders != null)
+                foreach (var p in allLocomotionProviders)
+                    if (p != null) p.enabled = false;
         }
 
         private void EnableLocomotion()
         {
-            if (teleportationProvider != null)
+            if (teleportationProvider != null) teleportationProvider.enabled = true;
+            if (continuousMoveProvider != null) continuousMoveProvider.enabled = true;
+            if (continuousTurnProvider != null) continuousTurnProvider.enabled = true;
+
+            if (allLocomotionProviders != null)
+                foreach (var p in allLocomotionProviders)
+                    if (p != null) p.enabled = true;
+        }
+
+        private void SpawnAnnotationCanvases()
+        {
+            if (symbolPaletteCanvasPrefab != null && activeSymbolPaletteCanvas == null)
             {
-                teleportationProvider.enabled = true;
+                activeSymbolPaletteCanvas = Instantiate(symbolPaletteCanvasPrefab);
+                activeSymbolPaletteCanvas.SetActive(true);
+
+                // Position after board is ready. OnEnable fires before ActiveDrawingBoard is set,
+                // so we call PositionNextToBoard explicitly here.
+                VRDrawing.Geology.UI.SymbolPaletteUI palette =
+                    activeSymbolPaletteCanvas.GetComponentInChildren<VRDrawing.Geology.UI.SymbolPaletteUI>(true);
+                palette?.PositionNextToBoard();
             }
 
-            if (continuousMoveProvider != null)
+            if (annotationLegendCanvasPrefab != null && activeAnnotationLegendCanvas == null)
             {
-                continuousMoveProvider.enabled = true;
+                activeAnnotationLegendCanvas = Instantiate(annotationLegendCanvasPrefab);
+                activeAnnotationLegendCanvas.SetActive(true);
+
+                VRDrawing.Geology.UI.AnnotationLegendUI legend =
+                    activeAnnotationLegendCanvas.GetComponentInChildren<VRDrawing.Geology.UI.AnnotationLegendUI>(true);
+                legend?.PositionNextToBoard();
+            }
+        }
+
+        private void DespawnAnnotationCanvases()
+        {
+            if (activeSymbolPaletteCanvas != null)
+            {
+                Destroy(activeSymbolPaletteCanvas);
+                activeSymbolPaletteCanvas = null;
             }
 
-            if (continuousTurnProvider != null)
+            if (activeAnnotationLegendCanvas != null)
             {
-                continuousTurnProvider.enabled = true;
+                Destroy(activeAnnotationLegendCanvas);
+                activeAnnotationLegendCanvas = null;
             }
+
+            // Cancel any pending annotation so the drawing tool is re-enabled cleanly.
+            VRDrawing.Geology.GeologicalAnnotationManager.Instance?.CancelAnnotationMode();
         }
 
         private void SpawnDrawingBoard()

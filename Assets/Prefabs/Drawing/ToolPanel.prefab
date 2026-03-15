@@ -1906,7 +1906,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 0
+  m_PresetInfoIsWorld: 1
 --- !u!114 &463092143747890376
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3098,7 +3098,7 @@ MonoBehaviour:
   m_MinValue: 0.002
   m_MaxValue: 0.02
   m_WholeNumbers: 0
-  m_Value: 0.005
+  m_Value: 0.015
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []

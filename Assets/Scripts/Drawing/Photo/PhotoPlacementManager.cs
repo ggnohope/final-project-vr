@@ -6,15 +6,15 @@ namespace VRDrawing.Photo
     public class PhotoPlacementManager : MonoBehaviour
     {
         [Header("Placement Settings")]
-        [SerializeField] private float photoDefaultWidth = 0.2f;
         [SerializeField] private float photoOffsetFromSurface = 0.001f;
         [SerializeField] private Material photoMaterial;
+
+        private const string PhotoObjectName = "BoardPhoto";
 
         public static PhotoPlacementManager Instance { get; private set; }
 
         /// <summary>
-        /// Always false — placement is now instantaneous, no waiting state exists.
-        /// Kept for backwards compatibility with UIRayDrawingTool.
+        /// Always false — placement is instantaneous. Kept for backwards compatibility.
         /// </summary>
         public bool IsInPlacementMode => false;
 
@@ -39,8 +39,8 @@ namespace VRDrawing.Photo
         }
 
         /// <summary>
-        /// Immediately places the photo at the center of the active drawing board.
-        /// Called as soon as the user selects a photo from the gallery.
+        /// Places the photo covering the entire drawing surface.
+        /// Replaces any previously placed photo and clears all ink strokes.
         /// </summary>
         public void EnterPlacementMode(Texture2D photo)
         {
@@ -58,7 +58,10 @@ namespace VRDrawing.Photo
                 return;
             }
 
+            RemoveExistingPhoto(surface);
+            surface.Clear();
             PlacePhotoOnSurface(surface, photo);
+
             Debug.Log($"[PhotoPlacementManager] Photo '{photo.name}' placed on '{surface.name}'.");
         }
 
@@ -82,19 +85,49 @@ namespace VRDrawing.Photo
             return FindFirstObjectByType<DrawingSurface>();
         }
 
+        /// <summary>
+        /// Destroys the existing board photo child object if one exists.
+        /// </summary>
+        private void RemoveExistingPhoto(DrawingSurface surface)
+        {
+            Transform existing = surface.transform.Find(PhotoObjectName);
+            if (existing != null)
+            {
+                Destroy(existing.gameObject);
+            }
+        }
+
         private void PlacePhotoOnSurface(DrawingSurface surface, Texture2D photo)
         {
-            GameObject photoObj = new GameObject($"Photo_{photo.name}");
+            GameObject photoObj = new GameObject(PhotoObjectName);
             photoObj.transform.SetParent(surface.transform);
 
-            float aspectRatio = (float)photo.width / photo.height;
-            float photoWidth = photoDefaultWidth;
-            float photoHeight = photoWidth / aspectRatio;
+            // Put the photo on the "Ignore Raycast" layer so the XRRayInteractor
+            // passes straight through it and continues to hit the DrawingSurface collider.
+            photoObj.layer = LayerMask.NameToLayer("Ignore Raycast");
 
-            // Place at the center of the surface, slightly in front of it
+            Vector3 localSize = GetSurfaceLocalSize(surface);
+            float surfaceWidth = localSize.x;
+            float surfaceHeight = localSize.y;
+
+            float photoAspect = (float)photo.width / photo.height;
+            float boardAspect = surfaceWidth / surfaceHeight;
+
+            float quadWidth, quadHeight;
+            if (photoAspect >= boardAspect)
+            {
+                quadWidth = surfaceWidth;
+                quadHeight = surfaceWidth / photoAspect;
+            }
+            else
+            {
+                quadHeight = surfaceHeight;
+                quadWidth = surfaceHeight * photoAspect;
+            }
+
             photoObj.transform.localPosition = new Vector3(0f, 0f, -photoOffsetFromSurface);
             photoObj.transform.localRotation = Quaternion.identity;
-            photoObj.transform.localScale = new Vector3(photoWidth, photoHeight, 1f);
+            photoObj.transform.localScale = new Vector3(quadWidth, quadHeight, 1f);
 
             MeshFilter meshFilter = photoObj.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = photoObj.AddComponent<MeshRenderer>();
@@ -107,6 +140,28 @@ namespace VRDrawing.Photo
 
             meshRenderer.sortingLayerName = "Default";
             meshRenderer.sortingOrder = 100;
+        }
+
+        /// <summary>
+        /// Derives the surface's local width/height from its collider bounds.
+        /// </summary>
+        private Vector3 GetSurfaceLocalSize(DrawingSurface surface)
+        {
+            Collider col = surface.GetComponent<Collider>();
+            if (col != null)
+            {
+                // Convert world-space bounds to local scale
+                Vector3 worldSize = col.bounds.size;
+                Vector3 localScale = surface.transform.lossyScale;
+                return new Vector3(
+                    localScale.x != 0f ? worldSize.x / Mathf.Abs(localScale.x) : worldSize.x,
+                    localScale.y != 0f ? worldSize.y / Mathf.Abs(localScale.y) : worldSize.y,
+                    1f
+                );
+            }
+
+            // Fallback: use a sensible default
+            return new Vector3(0.4f, 0.3f, 1f);
         }
 
         private Mesh CreateQuadMesh()
