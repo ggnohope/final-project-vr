@@ -74,3 +74,6 @@ crashlytics-build.properties
 .env
 /Assets/Resources/Config/ApiConfig.asset
 /Assets/Resources/Config/ApiConfig.asset.meta
+
+# gaussian splatting data
+/Assets/Resources/GsplatScenes/*
