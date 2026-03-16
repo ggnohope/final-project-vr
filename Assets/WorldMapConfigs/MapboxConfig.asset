@@ -12,13 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9600a182a63333e4c87d2aa72b5cb742, type: 3}
   m_Name: MapboxConfig
   m_EditorClassIdentifier: Assembly-CSharp::Core.MapboxConfig
-  accessToken: 
   styleId: mapbox/streets-v12
   tileSize: 256
-  defaultCenter: {x: 16, y: 106.5}
-  defaultZoom: 5
-  minZoom: 3
-  maxZoom: 8
-  minBounds: {x: 7, y: 100.5}
-  maxBounds: {x: 24.5, y: 110.5}
+  defaultCenter: {x: 11.05, y: 107.35}
+  defaultZoom: 9
+  minZoom: 7
+  maxZoom: 14
+  minBounds: {x: 10.6, y: 106.9}
+  maxBounds: {x: 11.6, y: 107.9}
   maxCachedTiles: 64

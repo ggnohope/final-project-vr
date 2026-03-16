@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -30,6 +31,12 @@ namespace Core
         [SerializeField] private bool enableScalePulse = true;
         [SerializeField] private float pulseScale = 1.15f;
         [SerializeField] private float pulseSpeed = 2f;
+
+        /// <summary>Fired when the pointer enters this hotspot. Arg: hotspot index.</summary>
+        public event Action<int> OnHoverEnter;
+
+        /// <summary>Fired when the pointer exits this hotspot. Arg: hotspot index.</summary>
+        public event Action<int> OnHoverExit;
 
         private RectTransform rectTransform;
         private Vector3 originalScale;
@@ -194,11 +201,13 @@ namespace Core
         public void OnPointerEnter(PointerEventData eventData)
         {
             SetActive(true);
+            OnHoverEnter?.Invoke(hotspotIndex);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             SetActive(false);
+            OnHoverExit?.Invoke(hotspotIndex);
         }
 
         public void OnPointerClick(PointerEventData eventData)

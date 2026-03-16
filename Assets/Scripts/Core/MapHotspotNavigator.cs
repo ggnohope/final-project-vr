@@ -157,8 +157,31 @@ namespace Core
                 if (hotspots[i] == null) continue;
                 hotspots[i].Initialize(hotspots[i].RegionId, i);
                 hotspots[i].SetNavigator(this);
+                hotspots[i].OnHoverEnter += OnHotspotHoverEnter;
+                hotspots[i].OnHoverExit  += OnHotspotHoverExit;
                 regionToIndexMap[hotspots[i].RegionId] = i;
             }
+        }
+
+        private void OnHotspotHoverEnter(int index)
+        {
+            if (!showTooltipOnSelection || tooltip == null) return;
+            if (hotspots == null || index < 0 || index >= hotspots.Length) return;
+
+            MapRegion? region = sceneMapData != null
+                ? sceneMapData.GetRegionById(hotspots[index].RegionId)
+                : null;
+
+            if (!region.HasValue) return;
+
+            Vector3 worldPos = hotspots[index].transform.position;
+            tooltip.Show(region.Value.displayName, worldPos);
+        }
+
+        private void OnHotspotHoverExit(int index)
+        {
+            if (tooltip != null)
+                tooltip.Hide();
         }
 
         /// <summary>

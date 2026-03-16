@@ -247,10 +247,20 @@ namespace Core
             int returnedCount = toRemove.Count;
             foreach (var key in toRemove) activeTiles.Remove(key);
 
+            // Sort keys by Chebyshev distance from center so tiles closest to the
+            // view center are requested first, expanding outward like a spiral.
+            var sortedKeys = new List<MapTileFetcher.TileKey>(neededKeys);
+            sortedKeys.Sort((a, b) =>
+            {
+                int distA = Mathf.Max(Mathf.Abs(a.X - centerTileX), Mathf.Abs(a.Y - centerTileY));
+                int distB = Mathf.Max(Mathf.Abs(b.X - centerTileX), Mathf.Abs(b.Y - centerTileY));
+                return distA.CompareTo(distB);
+            });
+
             // Create or reposition tiles for all needed keys
             int newRequests = 0;
             int repositioned = 0;
-            foreach (var key in neededKeys)
+            foreach (var key in sortedKeys)
             {
                 Vector2 canvasPos = TileToCanvasPosition(key.X, key.Y, centerTileFloorX, centerTileFloorY, renderTileSize);
 

@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VRDrawing.Mode;
 using VRDrawing.Tools;
+using VRDrawing.Export;
 
 namespace VRDrawing.UI
 {
@@ -12,7 +13,8 @@ namespace VRDrawing.UI
         [SerializeField] private Button eraserButton;
         [SerializeField] private Button undoButton;
         [SerializeField] private Button clearButton;
-        [SerializeField] private Button imageButton; // THÊM DÒNG NÀY
+        [SerializeField] private Button imageButton;
+        [SerializeField] private Button exportButton;
 
         [Header("Color Buttons")]
         [SerializeField] private Button[] colorButtons;
@@ -50,30 +52,22 @@ namespace VRDrawing.UI
         private void SetupButtons()
         {
             if (penButton != null)
-            {
                 penButton.onClick.AddListener(() => SetTool(ToolType.Pen));
-            }
 
             if (eraserButton != null)
-            {
                 eraserButton.onClick.AddListener(() => SetTool(ToolType.Eraser));
-            }
 
             if (undoButton != null)
-            {
                 undoButton.onClick.AddListener(Undo);
-            }
 
             if (clearButton != null)
-            {
                 clearButton.onClick.AddListener(Clear);
-            }
 
-            // THÊM SETUP CHO IMAGE BUTTON
             if (imageButton != null)
-            {
                 imageButton.onClick.AddListener(OpenPhotoGallery);
-            }
+
+            if (exportButton != null)
+                exportButton.onClick.AddListener(ExportBoard);
         }
 
         private void SetupColorButtons()
@@ -149,14 +143,14 @@ namespace VRDrawing.UI
         private void OpenPhotoGallery()
         {
             if (PhotoGalleryUI.Instance != null)
-            {
                 PhotoGalleryUI.Instance.ToggleGallery();
-                Debug.Log("[DrawingToolPanel] 📸 Photo Gallery opened!");
-            }
-            else
-            {
-                Debug.LogWarning("[DrawingToolPanel] PhotoGalleryUI not found in scene!");
-            }
+        }
+
+        /// <summary>Triggers a board capture and saves the result to the photo gallery folder.</summary>
+        private void ExportBoard()
+        {
+            if (BoardExporter.Instance != null)
+                BoardExporter.Instance.ExportBoard();
         }
 
         private void UpdateCurrentToolDisplay()
@@ -178,14 +172,9 @@ namespace VRDrawing.UI
 
         private void NotifyColorChange()
         {
-            Debug.Log($"[DrawingToolPanel] 🎨 NotifyColorChange! color={currentColor}");
-            
             DrawingToolBase[] tools = FindObjectsByType<DrawingToolBase>(FindObjectsSortMode.None);
-            Debug.Log($"[DrawingToolPanel] Found {tools.Length} tools");            
             foreach (var tool in tools)
-            {
                 tool.SetColor(currentColor);
-            }
         }
 
         private void NotifyThicknessChange()

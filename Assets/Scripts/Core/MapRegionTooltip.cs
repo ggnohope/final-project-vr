@@ -16,12 +16,14 @@ namespace Core
 
         [Header("Animation")]
         [SerializeField] private float fadeSpeed = 8f;
-        [SerializeField] private Vector2 offset = new Vector2(0f, 100f);
+        [SerializeField] private Vector2 offset = new Vector2(0f, 60f);
         [SerializeField] private float scaleSpeed = 10f;
 
         [Header("Colors")]
         [SerializeField] private Color backgroundColor = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
+        private Canvas parentCanvas;
+        private RectTransform canvasRect;
         private bool isVisible = false;
         private float targetAlpha = 0f;
         private Vector3 targetScale = Vector3.one;
@@ -48,6 +50,14 @@ namespace Core
                 tooltipRect.localScale = Vector3.zero;
             }
 
+            parentCanvas = GetComponentInParent<Canvas>();
+            if (parentCanvas != null)
+            {
+                // Always get the root canvas for coordinate conversion
+                parentCanvas = parentCanvas.rootCanvas;
+                canvasRect = parentCanvas.GetComponent<RectTransform>();
+            }
+
             gameObject.SetActive(false);
         }
 
@@ -64,12 +74,14 @@ namespace Core
             }
         }
 
-        public void Show(string regionName, Vector3 worldPosition)
+        /// <summary>Shows the tooltip at the given hotspot world position with only a name label.</summary>
+        public void Show(string regionName, Vector3 hotspotWorldPosition)
         {
-            Show(regionName, null, worldPosition);
+            Show(regionName, null, hotspotWorldPosition);
         }
 
-        public void Show(string regionName, string description, Vector3 worldPosition)
+        /// <summary>Shows the tooltip at the given hotspot world position with name and optional description.</summary>
+        public void Show(string regionName, string description, Vector3 hotspotWorldPosition)
         {
             if (!isVisible)
             {
@@ -100,7 +112,7 @@ namespace Core
                 instructionText.text = "Press Trigger to Load";
             }
 
-            UpdatePosition(worldPosition);
+            UpdatePosition(hotspotWorldPosition);
             targetAlpha = 1f;
             targetScale = Vector3.one;
         }
@@ -121,14 +133,36 @@ namespace Core
             }
         }
 
-        private void UpdatePosition(Vector3 worldPosition)
+        /// <summary>
+        /// Converts hotspot world position to canvas-local anchoredPosition and applies the offset.
+        /// Handles World Space, Screen Space Camera, and Screen Space Overlay canvases correctly.
+        /// </summary>
+        private void UpdatePosition(Vector3 hotspotWorldPosition)
         {
-            if (tooltipRect != null)
+            if (tooltipRect == null || parentCanvas == null || canvasRect == null)
             {
-                tooltipRect.position = worldPosition + (Vector3)offset;
+                Debug.LogWarning($"[MapRegionTooltip] UpdatePosition skipped — tooltipRect={tooltipRect}, parentCanvas={parentCanvas}, canvasRect={canvasRect}");
+                return;
             }
+
+            Camera cam = parentCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : parentCanvas.worldCamera;
+            Vector2 screenPoint = RectTransformUtility.WorldToScreenPoint(cam, hotspotWorldPosition);
+
+            bool converted = RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                canvasRect, screenPoint, cam, out Vector2 localPoint);
+
+            if (!converted)
+            {
+                Debug.LogWarning($"[MapRegionTooltip] ScreenPointToLocalPointInRectangle failed. hotspotWorldPos={hotspotWorldPosition}, screenPoint={screenPoint}");
+                return;
+            }
+
+            Debug.Log($"[MapRegionTooltip] hotspotWorldPos={hotspotWorldPosition} | screenPoint={screenPoint} | canvasLocalPoint={localPoint} | finalAnchoredPos={localPoint + offset}");
+
+            tooltipRect.anchoredPosition = localPoint + offset;
         }
 
+        /// <summary>Overrides the instruction label text.</summary>
         public void SetInstruction(string instruction)
         {
             if (instructionText != null)

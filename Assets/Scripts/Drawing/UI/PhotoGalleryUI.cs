@@ -11,8 +11,13 @@ namespace VRDrawing.UI
         [SerializeField] private Button toggleGalleryButton;
         [SerializeField] private Transform photoGridContent;
         [SerializeField] private GameObject photoButtonPrefab;
-        [SerializeField] private Button refreshButton;
+        [SerializeField] private Button deleteButton;
         [SerializeField] private Button closeButton;
+
+        [Header("Delete Mode UI")]
+        [SerializeField] private Button confirmDeleteButton;
+        [SerializeField] private Button cancelDeleteButton;
+        [SerializeField] private GameObject deleteActionsBar;
 
         [Header("Settings")]
         [SerializeField] private Vector2 thumbnailSize = new Vector2(100, 100);
@@ -23,9 +28,15 @@ namespace VRDrawing.UI
         [SerializeField] private float panelHeight = 0.2f;
         [SerializeField] private bool repositionOnOpen = true;
 
-        private List<GameObject> photoButtons = new List<GameObject>();
-        public static PhotoGalleryUI Instance { get; private set; }
+        [Header("Selection Visuals")]
+        [SerializeField] private Color selectedOverlayColor = new Color(1f, 0.3f, 0.3f, 0.5f);
 
+        private List<GameObject> photoButtons = new List<GameObject>();
+        private List<Texture2D> currentPhotos = new List<Texture2D>();
+        private HashSet<int> selectedIndices = new HashSet<int>();
+        private bool isDeleteMode = false;
+
+        public static PhotoGalleryUI Instance { get; private set; }
         private bool isGalleryOpen = false;
 
         private void Awake()
@@ -39,66 +50,57 @@ namespace VRDrawing.UI
                 Destroy(gameObject);
                 return;
             }
-            
-            SetupButtons();
-            
-            if (galleryPanel != null)
-            {
-                galleryPanel.SetActive(false);
-            }
-        }
 
+            SetupButtons();
+
+            if (galleryPanel != null)
+                galleryPanel.SetActive(false);
+
+            SetDeleteActionsBarVisible(false);
+        }
 
         private void OnEnable()
         {
             if (VRItems.Camera.PhotoAttachmentManager.Instance != null)
-            {
                 VRItems.Camera.PhotoAttachmentManager.Instance.OnPhotosUpdated += RefreshGallery;
-            }
         }
 
         private void OnDisable()
         {
             if (VRItems.Camera.PhotoAttachmentManager.Instance != null)
-            {
                 VRItems.Camera.PhotoAttachmentManager.Instance.OnPhotosUpdated -= RefreshGallery;
-            }
         }
 
         private void SetupButtons()
         {
             if (toggleGalleryButton != null)
-            {
                 toggleGalleryButton.onClick.AddListener(ToggleGallery);
-            }
 
-            if (refreshButton != null)
-            {
-                refreshButton.onClick.AddListener(RefreshGallery);
-            }
+            if (deleteButton != null)
+                deleteButton.onClick.AddListener(EnterDeleteMode);
 
             if (closeButton != null)
-            {
                 closeButton.onClick.AddListener(CloseGallery);
-            }
+
+            if (confirmDeleteButton != null)
+                confirmDeleteButton.onClick.AddListener(ConfirmDelete);
+
+            if (cancelDeleteButton != null)
+                cancelDeleteButton.onClick.AddListener(ExitDeleteMode);
         }
 
+        /// <summary>Toggles the gallery panel open or closed.</summary>
         public void ToggleGallery()
         {
             if (isGalleryOpen)
-            {
                 CloseGallery();
-            }
             else
-            {
                 OpenGallery();
-            }
         }
 
         private void OpenGallery()
         {
             isGalleryOpen = true;
-
             SetDrawingToolEnabled(false);
 
             if (galleryPanel != null)
@@ -107,62 +109,104 @@ namespace VRDrawing.UI
                 galleryPanel.SetActive(true);
             }
 
+            ExitDeleteMode();
             RefreshGallery();
-
-            Debug.Log("[PhotoGalleryUI] Gallery opened — drawing tool disabled.");
         }
 
         private void CloseGallery()
         {
             isGalleryOpen = false;
+            ExitDeleteMode();
 
             if (galleryPanel != null)
-            {
                 galleryPanel.SetActive(false);
-            }
 
             SetDrawingToolEnabled(true);
-
-            Debug.Log("[PhotoGalleryUI] Gallery closed — drawing tool re-enabled.");
         }
 
-        /// <summary>
-        /// Enables or disables the UIRayDrawingTool so it does not draw while the gallery is open.
-        /// </summary>
-        private void SetDrawingToolEnabled(bool enabled)
+        /// <summary>Enters delete-selection mode — photos become selectable for deletion.</summary>
+        private void EnterDeleteMode()
         {
-            VRDrawing.Tools.UIRayDrawingTool drawingTool =
-                FindFirstObjectByType<VRDrawing.Tools.UIRayDrawingTool>();
-
-            if (drawingTool != null)
-            {
-                drawingTool.SetEnabled(enabled);
-            }
+            isDeleteMode = true;
+            selectedIndices.Clear();
+            SetDeleteActionsBarVisible(true);
+            RefreshSelectionVisuals();
         }
 
-        private void PositionPanelInFrontOfCamera()
+        /// <summary>Exits delete-selection mode without deleting anything.</summary>
+        private void ExitDeleteMode()
         {
-            if (!repositionOnOpen || galleryPanel == null)
-                return;
+            isDeleteMode = false;
+            selectedIndices.Clear();
+            SetDeleteActionsBarVisible(false);
+            RefreshSelectionVisuals();
+        }
 
-            Camera playerCamera = Camera.main;
-            if (playerCamera == null)
+        private void ConfirmDelete()
+        {
+            if (selectedIndices.Count == 0)
             {
-                Debug.LogWarning("[PhotoGalleryUI] Main camera not found");
+                ExitDeleteMode();
                 return;
             }
 
-            Vector3 forward = playerCamera.transform.forward;
-            forward.y = 0f;
-            forward.Normalize();
- 
-            Vector3 targetPosition = playerCamera.transform.position + forward * panelDistance + Vector3.up * panelHeight;
-            
-            galleryPanel.transform.position = targetPosition;
-            galleryPanel.transform.LookAt(playerCamera.transform.position);
-            galleryPanel.transform.Rotate(0, 180, 0);
-            
-            Debug.Log($"[PhotoGalleryUI] Positioned panel at {targetPosition}, facing camera");
+            List<Texture2D> toDelete = new List<Texture2D>();
+            foreach (int idx in selectedIndices)
+            {
+                if (idx >= 0 && idx < currentPhotos.Count)
+                    toDelete.Add(currentPhotos[idx]);
+            }
+
+            VRItems.Camera.PhotoAttachmentManager.Instance?.DeletePhotos(toDelete);
+
+            ExitDeleteMode();
+            RefreshGallery();
+        }
+
+        private void OnPhotoButtonClicked(int index, Texture2D photo)
+        {
+            if (isDeleteMode)
+            {
+                TogglePhotoSelection(index);
+            }
+            else
+            {
+                if (VRDrawing.Photo.PhotoPlacementManager.Instance != null)
+                    VRDrawing.Photo.PhotoPlacementManager.Instance.EnterPlacementMode(photo);
+
+                CloseGallery();
+            }
+        }
+
+        private void TogglePhotoSelection(int index)
+        {
+            if (selectedIndices.Contains(index))
+                selectedIndices.Remove(index);
+            else
+                selectedIndices.Add(index);
+
+            RefreshSelectionVisuals();
+        }
+
+        private void RefreshSelectionVisuals()
+        {
+            for (int i = 0; i < photoButtons.Count; i++)
+            {
+                if (photoButtons[i] == null) continue;
+
+                Transform overlayTransform = photoButtons[i].transform.Find("SelectionOverlay");
+                if (overlayTransform != null)
+                    overlayTransform.gameObject.SetActive(isDeleteMode && selectedIndices.Contains(i));
+            }
+        }
+
+        private void SetDeleteActionsBarVisible(bool visible)
+        {
+            if (deleteActionsBar != null)
+                deleteActionsBar.SetActive(visible);
+
+            if (deleteButton != null)
+                deleteButton.gameObject.SetActive(!visible);
         }
 
         private void RefreshGallery()
@@ -170,32 +214,19 @@ namespace VRDrawing.UI
             ClearPhotoButtons();
 
             if (VRItems.Camera.PhotoAttachmentManager.Instance == null)
-            {
-                Debug.LogWarning("[PhotoGalleryUI] PhotoAttachmentManager not found");
                 return;
-            }
 
-            List<Texture2D> photos = VRItems.Camera.PhotoAttachmentManager.Instance.GetAllPhotos();
-            
-            Debug.Log($"[PhotoGalleryUI] Retrieved {photos.Count} photos from PhotoAttachmentManager");
-            
-            int count = Mathf.Min(photos.Count, maxPhotosToDisplay);
-            
+            currentPhotos = VRItems.Camera.PhotoAttachmentManager.Instance.GetAllPhotos();
+            int count = Mathf.Min(currentPhotos.Count, maxPhotosToDisplay);
+
             for (int i = 0; i < count; i++)
-            {
-                CreatePhotoButton(photos[i]);
-            }
-
-            Debug.Log($"[PhotoGalleryUI] Refreshed gallery with {count} photos");
+                CreatePhotoButton(i, currentPhotos[i]);
         }
 
-
-        private void CreatePhotoButton(Texture2D photo)
+        private void CreatePhotoButton(int index, Texture2D photo)
         {
             if (photoButtonPrefab == null || photoGridContent == null || photo == null)
-            {
                 return;
-            }
 
             GameObject buttonObj = Instantiate(photoButtonPrefab, photoGridContent);
             photoButtons.Add(buttonObj);
@@ -206,31 +237,71 @@ namespace VRDrawing.UI
                 thumbnail.texture = photo;
 
                 // RawImage uses stretch anchors (0,0)-(1,1) in the prefab, so sizeDelta must
-                // remain zero to fill the GridLayoutGroup cell correctly. Setting a non-zero
-                // sizeDelta would make the image larger than its cell, causing overlap.
+                // remain zero to fill the GridLayoutGroup cell correctly.
                 RectTransform rt = thumbnail.GetComponent<RectTransform>();
                 if (rt != null)
-                {
                     rt.sizeDelta = Vector2.zero;
-                }
             }
 
+            EnsureSelectionOverlay(buttonObj);
+
+            int capturedIndex = index;
             Button button = buttonObj.GetComponent<Button>();
             if (button != null)
-            {
-                button.onClick.AddListener(() => OnPhotoSelected(photo));
-            }
+                button.onClick.AddListener(() => OnPhotoButtonClicked(capturedIndex, photo));
         }
 
-        private void OnPhotoSelected(Texture2D photo)
+        private void EnsureSelectionOverlay(GameObject buttonObj)
         {
-            if (VRDrawing.Photo.PhotoPlacementManager.Instance != null)
+            Transform existing = buttonObj.transform.Find("SelectionOverlay");
+            if (existing != null)
             {
-                VRDrawing.Photo.PhotoPlacementManager.Instance.EnterPlacementMode(photo);
-                Debug.Log($"[PhotoGalleryUI] Photo '{photo.name}' selected - Click on board to place");
+                existing.gameObject.SetActive(false);
+                return;
             }
 
-            CloseGallery();
+            GameObject overlay = new GameObject("SelectionOverlay");
+            overlay.transform.SetParent(buttonObj.transform, false);
+
+            RectTransform overlayRt = overlay.AddComponent<RectTransform>();
+            overlayRt.anchorMin = Vector2.zero;
+            overlayRt.anchorMax = Vector2.one;
+            overlayRt.offsetMin = Vector2.zero;
+            overlayRt.offsetMax = Vector2.zero;
+
+            Image overlayImage = overlay.AddComponent<Image>();
+            overlayImage.color = selectedOverlayColor;
+            overlayImage.raycastTarget = false;
+
+            overlay.SetActive(false);
+        }
+
+        private void PositionPanelInFrontOfCamera()
+        {
+            if (!repositionOnOpen || galleryPanel == null)
+                return;
+
+            Camera playerCamera = Camera.main;
+            if (playerCamera == null)
+                return;
+
+            Vector3 forward = playerCamera.transform.forward;
+            forward.y = 0f;
+            forward.Normalize();
+
+            Vector3 targetPosition = playerCamera.transform.position + forward * panelDistance + Vector3.up * panelHeight;
+
+            galleryPanel.transform.position = targetPosition;
+            galleryPanel.transform.LookAt(playerCamera.transform.position);
+            galleryPanel.transform.Rotate(0, 180, 0);
+        }
+
+        /// <summary>Enables or disables the UIRayDrawingTool so it does not draw while the gallery is open.</summary>
+        private void SetDrawingToolEnabled(bool enabled)
+        {
+            VRDrawing.Tools.UIRayDrawingTool drawingTool = FindFirstObjectByType<VRDrawing.Tools.UIRayDrawingTool>();
+            if (drawingTool != null)
+                drawingTool.SetEnabled(enabled);
         }
 
         private void ClearPhotoButtons()
@@ -238,12 +309,12 @@ namespace VRDrawing.UI
             foreach (GameObject button in photoButtons)
             {
                 if (button != null)
-                {
                     Destroy(button);
-                }
             }
-            
+
             photoButtons.Clear();
+            currentPhotos.Clear();
+            selectedIndices.Clear();
         }
     }
 }

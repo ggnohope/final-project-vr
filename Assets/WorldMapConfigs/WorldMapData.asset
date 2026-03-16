@@ -14,33 +14,69 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Core.SceneMapData
   worldMapTexture: {fileID: 2800000, guid: a511c57b3b4c6234f94eedbaaf1a935b, type: 3}
   regions:
-  - regionId: region_0
-    displayName: horse
-    latLng: {x: 21.028, y: 105.854}
-    plyAssetPath: GsplatScenes/horse
+  - regionId: mo_da_soklu
+    displayName: "M\u1ECF \u0111\xE1 Soklu"
+    latLng: {x: 11.19, y: 107.22}
+    plyAssetPath: 
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       fieldOfView: 60
-    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - regionId: region_1
-    displayName: robot
-    latLng: {x: 10.776, y: 106.701}
-    plyAssetPath: GsplatScenes/robot
-    cameraConfig:
-      position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 1}
-      fieldOfView: 0
-    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - regionId: region_2
-    displayName: stream
-    latLng: {x: 16, y: 106.5}
-    plyAssetPath: GsplatScenes/stream
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: da_ba_chong
+    displayName: "\u0110\xE1 3 ch\u1ED3ng"
+    latLng: {x: 11.42, y: 107.54}
+    plyAssetPath: 
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       fieldOfView: 60
-    regionHighlightColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: hang_doi
+    displayName: "Hang d\u01A1i"
+    latLng: {x: 11.48, y: 107.59}
+    plyAssetPath: 
+    cameraConfig:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      fieldOfView: 60
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: bau_nuoc_soi
+    displayName: "B\xE0u n\u01B0\u1EDBc s\xF4i"
+    latLng: {x: 11.38, y: 107.57}
+    plyAssetPath: 
+    cameraConfig:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      fieldOfView: 60
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: thac_mai
+    displayName: "Th\xE1c Mai"
+    latLng: {x: 11.4, y: 107.53}
+    plyAssetPath: 
+    cameraConfig:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      fieldOfView: 60
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: song_la_nga
+    displayName: "S\xF4ng La Ng\xE0"
+    latLng: {x: 11.22, y: 107.4}
+    plyAssetPath: 
+    cameraConfig:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      fieldOfView: 60
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
+  - regionId: nui_me_cui
+    displayName: "N\xFAi M\u1EB9 C\xFAi"
+    latLng: {x: 10.89, y: 107.07}
+    plyAssetPath: 
+    cameraConfig:
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      fieldOfView: 60
+    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
   transitionFadeTime: 0.5
   minimumLoadTime: 1
   fadeCurve:
