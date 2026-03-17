@@ -171,6 +171,7 @@ namespace VRItems.Camera
         }
 
 
+        /// <summary>Attaches a photo texture to the active drawing board, filling it entirely regardless of aspect ratio.</summary>
         public void AttachPhotoToBoard(Texture2D photo)
         {
             if (photo == null)
@@ -180,7 +181,7 @@ namespace VRItems.Camera
                 return;
 
             GameObject activeBoard = VRDrawing.Mode.DrawingModeManager.Instance.ActiveDrawingBoard;
-            
+
             if (activeBoard == null)
                 return;
 
@@ -189,8 +190,14 @@ namespace VRItems.Camera
                 return;
 
             Material boardMaterial = boardRenderer.material;
-            if (boardMaterial != null)
-                boardMaterial.mainTexture = photo;
+            if (boardMaterial == null)
+                return;
+
+            boardMaterial.mainTexture = photo;
+
+            // Reset tiling and offset so the photo fills the entire board surface
+            boardMaterial.mainTextureScale = Vector2.one;
+            boardMaterial.mainTextureOffset = Vector2.zero;
         }
 
         public string GetProjectPhotosPath()

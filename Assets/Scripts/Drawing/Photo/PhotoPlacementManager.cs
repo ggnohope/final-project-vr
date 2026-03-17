@@ -102,34 +102,43 @@ namespace VRDrawing.Photo
             GameObject photoObj = new GameObject(PhotoObjectName);
             photoObj.transform.SetParent(surface.transform);
 
-            // Put the photo on the "Ignore Raycast" layer so the XRRayInteractor
-            // passes straight through it and continues to hit the DrawingSurface collider.
             photoObj.layer = LayerMask.NameToLayer("Ignore Raycast");
 
+            // Local size (box.size) is used for localScale since photoObj is a child of surface.
+            // World size (box.size * lossyScale) is used only for correct visual aspect-ratio comparison.
             Vector3 localSize = GetSurfaceLocalSize(surface);
-            float surfaceWidth = localSize.x;
-            float surfaceHeight = localSize.y;
+            Vector3 lossyScale = surface.transform.lossyScale;
+
+            float surfaceWorldWidth  = localSize.x * Mathf.Abs(lossyScale.x);
+            float surfaceWorldHeight = localSize.y * Mathf.Abs(lossyScale.y);
 
             float photoAspect = (float)photo.width / photo.height;
-            float boardAspect = surfaceWidth / surfaceHeight;
+            float boardAspect = surfaceWorldWidth / surfaceWorldHeight;
 
-            float quadWidth, quadHeight;
+            // Determine fill size in local space — fit photo inside board maintaining aspect ratio.
+            float quadLocalWidth, quadLocalHeight;
             if (photoAspect >= boardAspect)
             {
-                quadWidth = surfaceWidth;
-                quadHeight = surfaceWidth / photoAspect;
+                // Photo is wider than board: fit width, letterbox height.
+                quadLocalWidth  = localSize.x;
+                // Height in local space: world height = surfaceWorldWidth / photoAspect;
+                // local height = world height / abs(lossyScale.y)
+                quadLocalHeight = (surfaceWorldWidth / photoAspect) / Mathf.Abs(lossyScale.y);
             }
             else
             {
-                quadHeight = surfaceHeight;
-                quadWidth = surfaceHeight * photoAspect;
+                // Photo is taller than board: fit height, pillarbox width.
+                quadLocalHeight = localSize.y;
+                // Width in local space: world width = surfaceWorldHeight * photoAspect;
+                // local width = world width / abs(lossyScale.x)
+                quadLocalWidth  = (surfaceWorldHeight * photoAspect) / Mathf.Abs(lossyScale.x);
             }
 
             photoObj.transform.localPosition = new Vector3(0f, 0f, -photoOffsetFromSurface);
             photoObj.transform.localRotation = Quaternion.identity;
-            photoObj.transform.localScale = new Vector3(quadWidth, quadHeight, 1f);
+            photoObj.transform.localScale    = new Vector3(quadLocalWidth, quadLocalHeight, 1f);
 
-            MeshFilter meshFilter = photoObj.AddComponent<MeshFilter>();
+            MeshFilter   meshFilter   = photoObj.AddComponent<MeshFilter>();
             MeshRenderer meshRenderer = photoObj.AddComponent<MeshRenderer>();
 
             meshFilter.mesh = CreateQuadMesh();
@@ -139,28 +148,39 @@ namespace VRDrawing.Photo
             meshRenderer.material = photoMatInstance;
 
             meshRenderer.sortingLayerName = "Default";
-            meshRenderer.sortingOrder = 100;
+            meshRenderer.sortingOrder     = 100;
         }
 
         /// <summary>
         /// Derives the surface's local width/height from its collider bounds.
+        /// <summary>
+        /// Returns the surface's drawable size in surface-local space.
+        /// PhotoObj is parented to the surface, so localScale must be in the surface's local space.
+        /// BoxCollider.size is already in local space — no lossyScale multiplication needed here.
+        /// World-space sizes are only required for aspect-ratio comparisons; those are handled
+        /// separately in PlacePhotoOnSurface using lossyScale.
         /// </summary>
         private Vector3 GetSurfaceLocalSize(DrawingSurface surface)
         {
+            BoxCollider box = surface.GetComponent<BoxCollider>();
+            if (box != null)
+            {
+                return new Vector3(box.size.x, box.size.y, 1f);
+            }
+
             Collider col = surface.GetComponent<Collider>();
             if (col != null)
             {
-                // Convert world-space bounds to local scale
-                Vector3 worldSize = col.bounds.size;
-                Vector3 localScale = surface.transform.lossyScale;
+                // Fallback: convert world AABB back to local (only safe when scale is axis-aligned).
+                Vector3 worldSize  = col.bounds.size;
+                Vector3 lossyScale = surface.transform.lossyScale;
                 return new Vector3(
-                    localScale.x != 0f ? worldSize.x / Mathf.Abs(localScale.x) : worldSize.x,
-                    localScale.y != 0f ? worldSize.y / Mathf.Abs(localScale.y) : worldSize.y,
+                    lossyScale.x != 0f ? worldSize.x / Mathf.Abs(lossyScale.x) : worldSize.x,
+                    lossyScale.y != 0f ? worldSize.y / Mathf.Abs(lossyScale.y) : worldSize.y,
                     1f
                 );
             }
 
-            // Fallback: use a sensible default
             return new Vector3(0.4f, 0.3f, 1f);
         }
 

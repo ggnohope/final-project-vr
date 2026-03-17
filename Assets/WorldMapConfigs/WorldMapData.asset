@@ -17,7 +17,7 @@ MonoBehaviour:
   - regionId: mo_da_soklu
     displayName: "M\u1ECF \u0111\xE1 Soklu"
     latLng: {x: 11.19, y: 107.22}
-    plyAssetPath: 
+    plyAssetPath: GsplatScenes/mo-soklu
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -35,7 +35,7 @@ MonoBehaviour:
   - regionId: hang_doi
     displayName: "Hang d\u01A1i"
     latLng: {x: 11.48, y: 107.59}
-    plyAssetPath: 
+    plyAssetPath: GsplatScenes/hang-doi
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -44,7 +44,7 @@ MonoBehaviour:
   - regionId: bau_nuoc_soi
     displayName: "B\xE0u n\u01B0\u1EDBc s\xF4i"
     latLng: {x: 11.38, y: 107.57}
-    plyAssetPath: 
+    plyAssetPath: GsplatScenes/bau-nuoc-soi
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -53,7 +53,7 @@ MonoBehaviour:
   - regionId: thac_mai
     displayName: "Th\xE1c Mai"
     latLng: {x: 11.4, y: 107.53}
-    plyAssetPath: 
+    plyAssetPath: GsplatScenes/thac
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -71,7 +71,7 @@ MonoBehaviour:
   - regionId: nui_me_cui
     displayName: "N\xFAi M\u1EB9 C\xFAi"
     latLng: {x: 10.89, y: 107.07}
-    plyAssetPath: 
+    plyAssetPath: GsplatScenes/ho-tri-an
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}

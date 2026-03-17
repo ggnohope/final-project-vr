@@ -195,17 +195,32 @@ namespace Core
         private void ApplyCameraConfiguration(CameraConfig config)
         {
             if (mainCamera == null)
-            {
                 return;
+
+            Unity.XR.CoreUtils.XROrigin xrOrigin =
+                FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
+
+            if (xrOrigin != null)
+            {
+                // config.position is the intended XROrigin floor position for this hotspot.
+                // Setting it directly (rather than trying to offset by headset tracking height)
+                // ensures the floor stays at the correct Y level regardless of the player's
+                // real-world standing height — preventing the player from falling through the floor.
+                xrOrigin.transform.position = config.position;
+
+                // Apply yaw only — pitch/roll are owned by TrackedPoseDriver (headset orientation).
+                float yaw = config.rotation.eulerAngles.y;
+                xrOrigin.transform.eulerAngles = new Vector3(0f, yaw, 0f);
+            }
+            else
+            {
+                // Fallback for non-XR builds / Editor without XR simulator.
+                mainCamera.transform.position = config.position;
+                mainCamera.transform.rotation = config.rotation;
             }
 
-            mainCamera.transform.position = config.position;
-            mainCamera.transform.rotation = config.rotation;
-            
             if (config.fieldOfView > 0)
-            {
                 mainCamera.fieldOfView = config.fieldOfView;
-            }
         }
 
         public void UnloadCurrentScene()

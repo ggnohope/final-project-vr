@@ -365,18 +365,18 @@ namespace VRDrawing.Geology
             labelObj.transform.SetParent(parent.transform);
             labelObj.layer = ignoreRaycastLayer;
 
-            labelObj.transform.localPosition = new Vector3(0,0,LabelZOffset);
+            labelObj.transform.localPosition = new Vector3(0, 0, LabelZOffset);
+            labelObj.transform.localRotation  = Quaternion.identity;
 
             TextMeshPro tmp = labelObj.AddComponent<TextMeshPro>();
 
-            tmp.text = def.label;
-            tmp.fontSize = symbolSize * LabelFontSizePerUnit;
+            tmp.text      = def.label;
+            tmp.fontSize  = symbolSize * LabelFontSizePerUnit;
             tmp.alignment = TextAlignmentOptions.Center;
 
             Color labelColor = GetContrastColor(def.displayColor);
             labelColor.a = labelAlpha;
-
-            tmp.color = labelColor;
+            tmp.color    = labelColor;
 
             if (labelFont != null)
                 tmp.font = labelFont;

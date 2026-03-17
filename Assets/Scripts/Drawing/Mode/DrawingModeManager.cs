@@ -310,20 +310,17 @@ namespace VRDrawing.Mode
 
         private Vector3 CalculateBoardPosition()
         {
-            Vector3 forward = playerCamera.forward;
-            forward.y = 0f;
-            forward.Normalize();
-
+            // Use the XROrigin's yaw-only forward so board spawns in front of the player's
+            // standing direction, unaffected by head tilt from TrackedPoseDriver.
+            Vector3 forward = GetPlayerYawForward();
             return playerCamera.position + forward * boardDistance + Vector3.up * boardHeight;
         }
 
         private Quaternion CalculateBoardRotation()
         {
-            Vector3 forward = playerCamera.forward;
-            forward.y = 0f;
-            forward.Normalize();
-
-            return Quaternion.LookRotation(forward);
+            // Board mesh normals face local -Z. LookRotation(forward) sets local +Z = player forward,
+            // so local -Z faces the player — correct for visibility.
+            return Quaternion.LookRotation(GetPlayerYawForward());
         }
 
         public void ShowToolPanel()
@@ -367,11 +364,26 @@ namespace VRDrawing.Mode
 
         private Quaternion CalculatePanelRotation()
         {
-            Vector3 forward = playerCamera.forward;
-            forward.y = 0f;
-            forward.Normalize();
+            // Panel canvas also faces local -Z — same convention as the board.
+            return Quaternion.LookRotation(GetPlayerYawForward());
+        }
 
-            return Quaternion.LookRotation(forward);
+        /// <summary>
+        /// Returns the player's horizontal (yaw-only) forward direction derived from the XROrigin
+        /// root transform. This is stable and unaffected by head tilt from TrackedPoseDriver,
+        /// and correctly reflects any yaw applied by ApplyCameraConfiguration after a map load.
+        /// Falls back to flattening playerCamera.forward if xrOrigin is null.
+        /// </summary>
+        private Vector3 GetPlayerYawForward()
+        {
+            Transform source = xrOrigin != null ? xrOrigin : playerCamera;
+            Vector3 forward  = source.forward;
+            forward.y        = 0f;
+
+            if (forward.sqrMagnitude < 0.001f)
+                return Vector3.forward;
+
+            return forward.normalized;
         }
     }
 }

@@ -187,57 +187,47 @@ namespace VRItems.Camera
         {
             yield return new WaitForEndOfFrame();
 
-            Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
-            
-            if (screenshot == null)
-            {
-                Debug.LogError("[CameraModeManager] Failed to capture screenshot!");
-                yield break;
-            }
-            
-            Texture2D photo = null;
-            
-            if (screenshot.width != photoWidth || screenshot.height != photoHeight)
-            {
-                RenderTexture rt = RenderTexture.GetTemporary(photoWidth, photoHeight, 0, RenderTextureFormat.ARGB32);
-                RenderTexture currentRT = RenderTexture.active;
-                
-                Graphics.Blit(screenshot, rt);
-                RenderTexture.active = rt;
-                
-                photo = new Texture2D(photoWidth, photoHeight, TextureFormat.RGB24, false);
-                photo.ReadPixels(new Rect(0, 0, photoWidth, photoHeight), 0, 0);
-                photo.Apply();
-                
-                RenderTexture.active = currentRT;
-                RenderTexture.ReleaseTemporary(rt);
-                
-                Destroy(screenshot);
-            }
-            else
-            {
-                photo = screenshot;
-            }
-            
+            // Render trực tiếp từ camera vào RenderTexture với độ phân giải cao
+            RenderTexture renderRT = new RenderTexture(photoWidth, photoHeight, 24, RenderTextureFormat.ARGB32);
+            renderRT.antiAliasing = 4;
+            renderRT.filterMode = FilterMode.Trilinear;
+            renderRT.anisoLevel = 8;
+
+            RenderTexture previousRT = captureCamera.targetTexture;
+            captureCamera.targetTexture = renderRT;
+            captureCamera.Render();
+            captureCamera.targetTexture = previousRT;
+
+            RenderTexture currentActive = RenderTexture.active;
+            RenderTexture.active = renderRT;
+
+            Texture2D photo = new Texture2D(photoWidth, photoHeight, TextureFormat.RGB24, false);
+            photo.ReadPixels(new Rect(0, 0, photoWidth, photoHeight), 0, 0);
+            photo.Apply();
+
+            RenderTexture.active = currentActive;
+            renderRT.Release();
+            Destroy(renderRT);
+
             if (PhotoAttachmentManager.Instance != null)
             {
                 PhotoAttachmentManager.Instance.SavePhoto(photo);
             }
-            
+
             if (shutterSound != null && audioSource != null)
             {
                 audioSource.PlayOneShot(shutterSound);
             }
-            
+
             OnPhotoCaptured?.Invoke(photo);
-            
+
             Debug.Log($"[CameraModeManager] Photo captured! {photo.width}x{photo.height}");
 
             if (viewfinderUI != null && restoreUIState)
             {
                 viewfinderUI.SetActive(true);
             }
-            
+
             Destroy(photo);
         }
 
