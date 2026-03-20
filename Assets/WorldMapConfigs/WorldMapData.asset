@@ -18,6 +18,7 @@ MonoBehaviour:
     displayName: "M\u1ECF \u0111\xE1 Soklu"
     latLng: {x: 11.19, y: 107.22}
     plyAssetPath: GsplatScenes/mo-soklu
+    videoResourcePath: Videos/mo-soklu
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -27,6 +28,7 @@ MonoBehaviour:
     displayName: "\u0110\xE1 3 ch\u1ED3ng"
     latLng: {x: 11.42, y: 107.54}
     plyAssetPath: 
+    videoResourcePath: Videos/nui-3-chong
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -35,7 +37,8 @@ MonoBehaviour:
   - regionId: hang_doi
     displayName: "Hang d\u01A1i"
     latLng: {x: 11.48, y: 107.59}
-    plyAssetPath: GsplatScenes/hang-doi
+    plyAssetPath: GsplatScenes/hang-doi-2
+    videoResourcePath: 
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -45,6 +48,7 @@ MonoBehaviour:
     displayName: "B\xE0u n\u01B0\u1EDBc s\xF4i"
     latLng: {x: 11.38, y: 107.57}
     plyAssetPath: GsplatScenes/bau-nuoc-soi
+    videoResourcePath: Videos/bau-nuoc-soi
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -54,15 +58,7 @@ MonoBehaviour:
     displayName: "Th\xE1c Mai"
     latLng: {x: 11.4, y: 107.53}
     plyAssetPath: GsplatScenes/thac
-    cameraConfig:
-      position: {x: 0, y: 0, z: 0}
-      rotation: {x: 0, y: 0, z: 0, w: 1}
-      fieldOfView: 60
-    regionHighlightColor: {r: 0.8, g: 0.15, b: 0.15, a: 1}
-  - regionId: song_la_nga
-    displayName: "S\xF4ng La Ng\xE0"
-    latLng: {x: 11.22, y: 107.4}
-    plyAssetPath: 
+    videoResourcePath: Videos/thac-mai
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
@@ -72,6 +68,7 @@ MonoBehaviour:
     displayName: "N\xFAi M\u1EB9 C\xFAi"
     latLng: {x: 10.89, y: 107.07}
     plyAssetPath: GsplatScenes/ho-tri-an
+    videoResourcePath: Videos/ho-tri-an
     cameraConfig:
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}

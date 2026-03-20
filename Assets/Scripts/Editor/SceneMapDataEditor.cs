@@ -102,6 +102,7 @@ namespace Editor
                 EditorGUILayout.PropertyField(displayNameProp, new GUIContent("Display Name"));
                 EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("latLng"), new GUIContent("Lat / Lng", "Province centroid. x = latitude (N), y = longitude (E). Decimal degrees WGS84."));
                 EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("plyAssetPath"), new GUIContent("Ply Asset Path"));
+                EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("videoResourcePath"), new GUIContent("FlyCam Video Path", "Path relative to Resources folder, no extension. E.g. 'Videos/my-flycam'"));
 
                 var cameraProp = regionProp.FindPropertyRelative("cameraConfig");
                 EditorGUILayout.LabelField("Camera Config", EditorStyles.miniBoldLabel);
@@ -152,11 +153,12 @@ namespace Editor
             // Default centroid: center of Vietnam
             newRegions[newIndex] = new MapRegion
             {
-                regionId        = $"region_{newIndex}",
-                displayName     = string.Empty,
-                latLng          = new Vector2(16.0f, 106.5f),
-                plyAssetPath    = string.Empty,
-                cameraConfig    = new CameraConfig { fieldOfView = 60f },
+                regionId             = $"region_{newIndex}",
+                displayName          = string.Empty,
+                latLng               = new Vector2(16.0f, 106.5f),
+                plyAssetPath         = string.Empty,
+                videoResourcePath    = string.Empty,
+                cameraConfig         = new CameraConfig { fieldOfView = 60f },
                 regionHighlightColor = Color.yellow
             };
 

@@ -77,3 +77,6 @@ crashlytics-build.properties
 
 # gaussian splatting data
 /Assets/Resources/GsplatScenes/*
+
+# flycam videos
+/Assets/Resources/Videos/*

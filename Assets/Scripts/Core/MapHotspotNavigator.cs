@@ -44,6 +44,10 @@ namespace Core
         [SerializeField] private MapRegionTooltip tooltip;
         [SerializeField] private bool showTooltipOnSelection = true;
 
+        [Header("Hotspot Action Panel (Optional)")]
+        [SerializeField] private HotspotActionPanel actionPanel;
+        [SerializeField] private FlyCamVideoPanel flyCamVideoPanel;
+
         private int currentHotspotIndex = -1;
         private Dictionary<string, int> regionToIndexMap;
 
@@ -61,6 +65,22 @@ namespace Core
 
         private void Start()
         {
+            // Fallback auto-find if Inspector references were lost after recompile
+            if (actionPanel == null)
+            {
+                // HotspotActionPanel is a sibling under the same parent Canvas
+                Transform parent = transform.parent != null ? transform.parent : transform;
+                actionPanel = parent.GetComponentInChildren<HotspotActionPanel>(true);
+            }
+
+            if (flyCamVideoPanel == null)
+                flyCamVideoPanel = FindFirstObjectByType<FlyCamVideoPanel>(FindObjectsInactive.Include);
+
+            if (actionPanel != null)
+                actionPanel.Initialize(this, flyCamVideoPanel);
+            else
+                Debug.LogError("[MapHotspotNavigator] HotspotActionPanel not found! Assign it in Inspector.");
+
             if (autoGenerateFromData)
             {
                 StartCoroutine(GenerateHotspotsNextFrame());
@@ -165,23 +185,38 @@ namespace Core
 
         private void OnHotspotHoverEnter(int index)
         {
-            if (!showTooltipOnSelection || tooltip == null) return;
             if (hotspots == null || index < 0 || index >= hotspots.Length) return;
 
             MapRegion? region = sceneMapData != null
                 ? sceneMapData.GetRegionById(hotspots[index].RegionId)
                 : null;
 
-            if (!region.HasValue) return;
+            if (!region.HasValue)
+            {
+                Debug.LogWarning($"[MapHotspotNavigator] HoverEnter index={index} — region NOT found for id='{hotspots[index].RegionId}'");
+                return;
+            }
 
             Vector3 worldPos = hotspots[index].transform.position;
-            tooltip.Show(region.Value.displayName, worldPos);
+            Debug.Log($"[MapHotspotNavigator] HoverEnter '{region.Value.regionId}' worldPos={worldPos} | actionPanel={(actionPanel != null ? "OK" : "NULL")}");
+
+            if (showTooltipOnSelection && tooltip != null)
+                tooltip.Show(region.Value.displayName, worldPos);
+
+            if (actionPanel != null)
+                actionPanel.ShowForRegion(region.Value, worldPos);
+            else
+                Debug.LogError("[MapHotspotNavigator] actionPanel is NULL — check Inspector reference.");
         }
 
         private void OnHotspotHoverExit(int index)
         {
             if (tooltip != null)
                 tooltip.Hide();
+
+            // Start auto-hide timer so the user can still move cursor onto the buttons
+            if (actionPanel != null)
+                actionPanel.StartAutoHide();
         }
 
         /// <summary>
@@ -207,8 +242,24 @@ namespace Core
             if (tooltip != null)
                 tooltip.Hide();
 
+            if (actionPanel != null)
+                actionPanel.Hide();
+
             if (worldMapController != null)
                 worldMapController.LoadRegion(region.Value);
+        }
+
+        /// <summary>Loads a region directly — used by HotspotActionPanel's Load Map button.</summary>
+        public void LoadRegionDirectly(MapRegion region)
+        {
+            if (tooltip != null)
+                tooltip.Hide();
+
+            if (actionPanel != null)
+                actionPanel.Hide();
+
+            if (worldMapController != null)
+                worldMapController.LoadRegion(region);
         }
 
         /// <summary>Immediately loads a region without hotspot click, used by external systems.</summary>

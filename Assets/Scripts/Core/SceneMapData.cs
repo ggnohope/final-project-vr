@@ -21,6 +21,10 @@ namespace Core
         public Vector2 latLng;
 
         public string plyAssetPath;
+
+        [Tooltip("Path to a video clip inside Resources folder (without extension), e.g. 'Videos/MyFlyover'. Used for the FlyCam preview mode.")]
+        public string videoResourcePath;
+
         public CameraConfig cameraConfig;
         public Color regionHighlightColor;
     }
