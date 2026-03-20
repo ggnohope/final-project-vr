@@ -12,6 +12,16 @@ namespace Core
     }
 
     [Serializable]
+    public struct RegionModel3D
+    {
+        [Tooltip("File name (without extension) inside Resources/3DModels. E.g. 'NC-1'.")]
+        public string modelName;
+
+        [Tooltip("World-space position where this model is placed when its region is loaded.")]
+        public Vector3 position;
+    }
+
+    [Serializable]
     public struct MapRegion
     {
         public string regionId;
@@ -24,6 +34,9 @@ namespace Core
 
         [Tooltip("Path to a video clip inside Resources folder (without extension), e.g. 'Videos/MyFlyover'. Used for the FlyCam preview mode.")]
         public string videoResourcePath;
+
+        [Tooltip("GLB models to load when this region is active. Each entry defines a file name and its world-space placement position.")]
+        public RegionModel3D[] models;
 
         public CameraConfig cameraConfig;
         public Color regionHighlightColor;

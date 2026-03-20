@@ -79,4 +79,4 @@ crashlytics-build.properties
 /Assets/Resources/GsplatScenes/*
 
 # flycam videos
-/Assets/Resources/Videos/*
+/Assets/StreamingAssets/Videos/*

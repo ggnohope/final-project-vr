@@ -101,9 +101,11 @@ namespace Core
             videoPlayer.loopPointReached += OnVideoEnded;
             videoPlayer.errorReceived    += OnVideoError;
 
-            Debug.Log($"[FlyCamVideoPanel] SetupVideoPlayer — renderTexture={renderTexture.width}x{renderTexture.height} " +
+            Debug.Log($"[FlyCamVideoPanel] SetupVideoPlayer — " +
+                      $"renderTexture={renderTexture.width}x{renderTexture.height} created={renderTexture.IsCreated()} " +
                       $"videoDisplay={(videoDisplay != null ? "OK" : "NULL")} " +
-                      $"targetTexture={(videoPlayer.targetTexture != null ? "OK" : "NULL")}");
+                      $"targetTexture={(videoPlayer.targetTexture != null ? "OK" : "NULL")} " +
+                      $"renderMode={videoPlayer.renderMode}");
         }
 
         private void RegisterButtonListeners()
@@ -225,28 +227,76 @@ namespace Core
 
         private void LoadAndPlayVideo(string resourcePath)
         {
-            if (string.IsNullOrEmpty(resourcePath)) return;
-
-            VideoClip clip = Resources.Load<VideoClip>(resourcePath);
-            if (clip == null)
+            if (string.IsNullOrEmpty(resourcePath))
             {
-                Debug.LogWarning($"[FlyCamVideoPanel] VideoClip not found at Resources/{resourcePath}");
-                if (loadingIndicator != null)
-                    loadingIndicator.SetActive(false);
+                Debug.LogError("[FlyCamVideoPanel] LoadAndPlayVideo called with null or empty resourcePath.");
                 return;
             }
 
-            videoPlayer.Stop();
-            videoPlayer.clip = clip;
+            string fullPath = System.IO.Path.Combine(Application.streamingAssetsPath, resourcePath + ".mp4")
+                                            .Replace('\\', '/');
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+            string videoUrl = fullPath;
+#else
+            string videoUrl = "file://" + fullPath;
+#endif
+
+            // Ensure render texture is valid before assigning
+            if (renderTexture == null || !renderTexture.IsCreated())
+            {
+                renderTexture = new RenderTexture(renderTextureSize.x, renderTextureSize.y, 0);
+                renderTexture.Create();
+                Debug.LogWarning("[FlyCamVideoPanel] RenderTexture was lost — recreated.");
+            }
+
+            // Configure VideoPlayer fully before Prepare() — do NOT call Stop() as it clears targetTexture
+            videoPlayer.renderMode    = VideoRenderMode.RenderTexture;
+            videoPlayer.targetTexture = renderTexture;
+            videoPlayer.source        = VideoSource.Url;
+            videoPlayer.url           = videoUrl;
+            videoPlayer.clip          = null;
+            videoPlayer.timeUpdateMode = VideoTimeUpdateMode.GameTime;
+
+            // Wire RawImage to render texture
+            if (videoDisplay != null)
+                videoDisplay.texture = renderTexture;
+
+            Debug.Log($"[FlyCamVideoPanel] LoadAndPlayVideo — url='{videoUrl}' " +
+                      $"targetTexture={(videoPlayer.targetTexture != null ? "OK" : "NULL")} " +
+                      $"renderTexture.IsCreated={renderTexture.IsCreated()} " +
+                      $"videoDisplay.texture={(videoDisplay != null && videoDisplay.texture != null ? "OK" : "NULL")}");
+
             videoPlayer.Prepare();
+            Debug.Log("[FlyCamVideoPanel] VideoPlayer.Prepare() called — waiting for prepareCompleted callback.");
         }
 
         private void OnVideoPrepared(VideoPlayer vp)
         {
+            Debug.Log($"[FlyCamVideoPanel] OnVideoPrepared — isPrepared={vp.isPrepared} " +
+                      $"duration={vp.length:F2}s resolution={vp.width}x{vp.height} " +
+                      $"targetTexture={(vp.targetTexture != null ? "OK" : "NULL")} " +
+                      $"renderTexture.IsCreated={renderTexture != null && renderTexture.IsCreated()} " +
+                      $"videoDisplay.texture={(videoDisplay != null ? (videoDisplay.texture != null ? videoDisplay.texture.name : "NULL tex") : "NULL display")}");
+
             if (loadingIndicator != null)
                 loadingIndicator.SetActive(false);
 
+            // Ensure render texture is still wired up after prepare
+            if (vp.targetTexture == null)
+            {
+                Debug.LogWarning("[FlyCamVideoPanel] targetTexture was NULL after prepare — re-assigning.");
+                vp.targetTexture = renderTexture;
+            }
+
+            if (videoDisplay != null && videoDisplay.texture != renderTexture)
+            {
+                Debug.LogWarning("[FlyCamVideoPanel] videoDisplay.texture mismatch — re-assigning renderTexture.");
+                videoDisplay.texture = renderTexture;
+            }
+
             videoPlayer.Play();
+            Debug.Log($"[FlyCamVideoPanel] Play() called — isPlaying={videoPlayer.isPlaying}");
 
             if (playPauseButtonText != null)
                 playPauseButtonText.text = PauseLabel;
@@ -300,6 +350,8 @@ namespace Core
             if (videoPlayer == null) return;
             videoPlayer.Stop();
             videoPlayer.clip = null;
+            videoPlayer.url = string.Empty;
+            // Preserve targetTexture assignment to avoid null on next Show()
         }
 
         private void PositionInFrontOfPlayer()

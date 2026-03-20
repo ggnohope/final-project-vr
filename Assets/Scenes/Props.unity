@@ -4474,6 +4474,7 @@ GameObject:
   - component: {fileID: 249434816}
   - component: {fileID: 249434819}
   - component: {fileID: 249434820}
+  - component: {fileID: 249434821}
   m_Layer: 0
   m_Name: GaussianSplattingManager
   m_TagString: Untagged
@@ -4557,8 +4558,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Core.FloorTransparencyController
   sceneLoader: {fileID: 0}
   floorRoot: {fileID: 1302664499}
-  transparentMaterial: {fileID: 2100000, guid: 4c72919ee7657ec4d87e9830c2b3bad3, type: 2}
   fadeDuration: 0.5
+--- !u!114 &249434821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 249434815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05954bd5fc2aeb140a4d986c23c49416, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Core.MapModel3DLoader
+  sceneLoader: {fileID: 249434816}
+  sceneMapData: {fileID: 11400000, guid: e91aa1a5dc7de3544866ef2e75d3dcce, type: 2}
 --- !u!1 &259033782
 GameObject:
   m_ObjectHideFlags: 0
@@ -6469,7 +6483,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -28586,7 +28600,7 @@ MonoBehaviour:
   regionNameText: {fileID: 380599481}
   loadingIndicator: {fileID: 218615341}
   videoPlayer: {fileID: 1577932887}
-  distanceFromPlayer: 2
+  distanceFromPlayer: 1
   fadeSpeed: 8
   worldMapCanvas: {fileID: 793521959}
   renderTextureSize: {x: 1280, y: 720}

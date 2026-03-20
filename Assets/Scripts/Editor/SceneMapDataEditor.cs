@@ -104,6 +104,8 @@ namespace Editor
                 EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("plyAssetPath"), new GUIContent("Ply Asset Path"));
                 EditorGUILayout.PropertyField(regionProp.FindPropertyRelative("videoResourcePath"), new GUIContent("FlyCam Video Path", "Path relative to Resources folder, no extension. E.g. 'Videos/my-flycam'"));
 
+                DrawModelsArray(regionProp.FindPropertyRelative("models"));
+
                 var cameraProp = regionProp.FindPropertyRelative("cameraConfig");
                 EditorGUILayout.LabelField("Camera Config", EditorStyles.miniBoldLabel);
                 EditorGUI.indentLevel++;
@@ -178,6 +180,47 @@ namespace Editor
                     updated[i] = regionFoldouts[i];
                 regionFoldouts = updated;
             }
+        }
+
+        /// <summary>Draws an inline editable list of RegionModel3D entries (model name + position).</summary>
+        private void DrawModelsArray(SerializedProperty modelsProp)
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("3D Models", EditorStyles.miniBoldLabel);
+
+            for (int i = 0; i < modelsProp.arraySize; i++)
+            {
+                SerializedProperty entry = modelsProp.GetArrayElementAtIndex(i);
+                SerializedProperty nameProp     = entry.FindPropertyRelative("modelName");
+                SerializedProperty posProp      = entry.FindPropertyRelative("position");
+
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField($"[{i}]", GUILayout.Width(24));
+                nameProp.stringValue = EditorGUILayout.TextField(nameProp.stringValue, GUILayout.Width(80));
+                posProp.vector3Value = EditorGUILayout.Vector3Field(GUIContent.none, posProp.vector3Value);
+
+                Color prev = GUI.backgroundColor;
+                GUI.backgroundColor = new Color(1f, 0.4f, 0.4f);
+                if (GUILayout.Button("✕", GUILayout.Width(22)))
+                {
+                    modelsProp.DeleteArrayElementAtIndex(i);
+                    GUI.backgroundColor = prev;
+                    EditorGUILayout.EndHorizontal();
+                    break;
+                }
+                GUI.backgroundColor = prev;
+                EditorGUILayout.EndHorizontal();
+            }
+
+            if (GUILayout.Button("+ Add Model", EditorStyles.miniButton))
+            {
+                modelsProp.InsertArrayElementAtIndex(modelsProp.arraySize);
+                SerializedProperty newEntry = modelsProp.GetArrayElementAtIndex(modelsProp.arraySize - 1);
+                newEntry.FindPropertyRelative("modelName").stringValue = string.Empty;
+                newEntry.FindPropertyRelative("position").vector3Value  = Vector3.zero;
+            }
+
+            EditorGUILayout.EndVertical();
         }
     }
 }
