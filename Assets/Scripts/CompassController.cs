@@ -5,54 +5,45 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 /// <summary>
 /// VR Compass Controller that points toward world north when held.
 /// Works with XR Grab Interactable to detect when compass is being held.
+/// The needle rotates around the Y axis in local space to always point to world north.
+/// Red/North tip of the needle points toward world north (positive Z).
 /// </summary>
 [RequireComponent(typeof(XRGrabInteractable))]
 public class CompassController : MonoBehaviour
 {
     [Header("Compass Needle Settings")]
-    [Tooltip("The transform of the compass needle. Should be a child object that rotates to point north.")]
+    [Tooltip("The pivot transform of the compass needle. This is the object that rotates.")]
     [SerializeField] private Transform needleTransform;
-    
-    [Tooltip("The direction the needle should point when facing north. Default is forward (0, 0, 1).")]
-    [SerializeField] private Vector3 northDirection = Vector3.forward;
-    
+
     [Tooltip("Smooth rotation speed for the needle. Higher values = faster rotation.")]
-    [SerializeField] private float rotationSpeed = 10f;
-    
+    [SerializeField] private float rotationSpeed = 8f;
+
     [Tooltip("Enable smooth rotation. If false, needle snaps instantly to north.")]
     [SerializeField] private bool smoothRotation = true;
-    
+
     [Header("VR Interaction")]
     [Tooltip("Only rotate needle when compass is being held. If false, always rotates.")]
     [SerializeField] private bool onlyRotateWhenHeld = true;
-    
+
+    private static readonly Vector3 WorldNorth = Vector3.forward;
+
     private XRGrabInteractable grabInteractable;
     private bool isBeingHeld = false;
-    
+
     private void Awake()
     {
-        // Get XR Grab Interactable component
         grabInteractable = GetComponent<XRGrabInteractable>();
-        
-        if (grabInteractable == null)
-        {
-        }
-        
-        // Find needle transform if not assigned
+
         if (needleTransform == null)
         {
-            // Look for a child object named "Needle"
-            Transform foundNeedle = transform.Find("Needle");
-            if (foundNeedle != null)
-            {
-                needleTransform = foundNeedle;
-            }
+            Transform found = transform.Find("Needle");
+            if (found != null)
+                needleTransform = found;
             else
-            {
-            }
+                Debug.LogWarning("[CompassController] Needle transform not assigned and 'Needle' child not found.", this);
         }
     }
-    
+
     private void OnEnable()
     {
         if (grabInteractable != null)
@@ -61,7 +52,7 @@ public class CompassController : MonoBehaviour
             grabInteractable.selectExited.AddListener(OnReleased);
         }
     }
-    
+
     private void OnDisable()
     {
         if (grabInteractable != null)
@@ -70,31 +61,30 @@ public class CompassController : MonoBehaviour
             grabInteractable.selectExited.RemoveListener(OnReleased);
         }
     }
-    
+
     private void Update()
     {
-        // Only update if being held (or if always updating)
         if (onlyRotateWhenHeld && !isBeingHeld)
             return;
-        
+
         if (needleTransform == null)
             return;
-        
-        // Calculate the direction to world north (positive Z axis) in world space
-        Vector3 worldNorth = Vector3.forward;
-        
-        // Convert world north direction to local space relative to the compass body
-        Vector3 localNorth = transform.InverseTransformDirection(worldNorth);
-        
-        // Project onto the XZ plane (remove Y component) to keep rotation only on Y axis
-        localNorth.y = 0;
+
+        // Project world north onto the compass body's XZ plane (local space)
+        Vector3 localNorth = transform.InverseTransformDirection(WorldNorth);
+        localNorth.y = 0f;
+
+        // Degenerate case: compass is pointing straight up/down — keep last rotation
+        if (localNorth.sqrMagnitude < 0.001f)
+            return;
+
         localNorth.Normalize();
-        
-        // Calculate the target rotation for the needle
-        // The needle should point in the direction of localNorth (toward world north)
-        Quaternion targetRotation = Quaternion.LookRotation(localNorth, Vector3.up);
-        
-        // Apply rotation to the needle
+
+        // Needle's forward (local Z) should point toward north in compass local space.
+        // We only rotate around Y axis to keep the needle flat on the compass face.
+        float targetAngle = Mathf.Atan2(localNorth.x, localNorth.z) * Mathf.Rad2Deg;
+        Quaternion targetRotation = Quaternion.Euler(0f, targetAngle, 0f);
+
         if (smoothRotation)
         {
             needleTransform.localRotation = Quaternion.Slerp(
@@ -108,52 +98,63 @@ public class CompassController : MonoBehaviour
             needleTransform.localRotation = targetRotation;
         }
     }
-    
+
     private void OnGrabbed(SelectEnterEventArgs args)
     {
         isBeingHeld = true;
     }
-    
+
     private void OnReleased(SelectExitEventArgs args)
     {
         isBeingHeld = false;
     }
-    
+
     /// <summary>
-    /// Call this method to manually set the needle transform if it's not assigned in inspector.
+    /// Manually set the needle pivot transform at runtime.
     /// </summary>
     public void SetNeedleTransform(Transform needle)
     {
         needleTransform = needle;
     }
-    
+
     /// <summary>
-    /// Get the current heading angle in degrees (0 = North, 90 = East, 180 = South, 270 = West).
+    /// Returns the current heading angle in degrees (0 = North, 90 = East, 180 = South, 270 = West).
+    /// Based on the compass body's forward direction projected onto the world XZ plane.
     /// </summary>
     public float GetHeading()
     {
-        // Get the forward direction of the compass body in world space
         Vector3 forward = transform.forward;
-        
-        // Project onto XZ plane
-        forward.y = 0;
+        forward.y = 0f;
+
+        if (forward.sqrMagnitude < 0.001f)
+            return 0f;
+
         forward.Normalize();
-        
-        // Calculate angle from north (forward/Z axis)
         float angle = Vector3.SignedAngle(Vector3.forward, forward, Vector3.up);
-        
-        // Convert to 0-360 range
-        if (angle < 0)
-            angle += 360f;
-        
-        return angle;
+        return angle < 0f ? angle + 360f : angle;
     }
-    
+
     /// <summary>
-    /// Gets whether the compass is currently being held.
+    /// Returns the current cardinal direction label based on heading.
     /// </summary>
-    public bool IsBeingHeld()
+    public string GetCardinalDirection()
     {
-        return isBeingHeld;
+        float heading = GetHeading();
+        return heading switch
+        {
+            < 22.5f or >= 337.5f => "N",
+            < 67.5f => "NE",
+            < 112.5f => "E",
+            < 157.5f => "SE",
+            < 202.5f => "S",
+            < 247.5f => "SW",
+            < 292.5f => "W",
+            _ => "NW"
+        };
     }
+
+    /// <summary>
+    /// Gets whether the compass is currently being held by the player.
+    /// </summary>
+    public bool IsBeingHeld() => isBeingHeld;
 }

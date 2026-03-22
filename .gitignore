@@ -80,3 +80,7 @@ crashlytics-build.properties
 
 # flycam videos
 /Assets/StreamingAssets/Videos/*
+
+# build files
+*.obb
+*.apk
