@@ -68,7 +68,6 @@ namespace VRDrawing.Editor
             GameObject manager = new GameObject("DrawingSystemManager");
             manager.AddComponent<DrawingSystemManager>();
             EditorGUIUtility.PingObject(manager);
-            Debug.Log("Created DrawingSystemManager");
         }
 
         private void SetupDrawingBoard(GameObject board)
@@ -111,7 +110,6 @@ namespace VRDrawing.Editor
             }
 
             EditorGUIUtility.PingObject(surfaceTransform.gameObject);
-            Debug.Log($"Setup DrawingSurface on {board.name}");
         }
 
         private void SetupPenTool(GameObject pen)
@@ -147,7 +145,6 @@ namespace VRDrawing.Editor
             tipCollider.isTrigger = true;
 
             EditorGUIUtility.PingObject(pen);
-            Debug.Log($"Setup PenTool on {pen.name}");
         }
 
         private void CreateNewPenPrefab()
@@ -174,7 +171,6 @@ namespace VRDrawing.Editor
 
             PrefabUtility.SaveAsPrefabAsset(pen, "Assets/Prefabs/PenTool.prefab");
             EditorGUIUtility.PingObject(pen);
-            Debug.Log("Created PenTool prefab at Assets/Prefabs/PenTool.prefab");
         }
 
         private void CreateNewEraserPrefab()
@@ -210,7 +206,6 @@ namespace VRDrawing.Editor
 
             PrefabUtility.SaveAsPrefabAsset(eraser, "Assets/Prefabs/EraserTool.prefab");
             EditorGUIUtility.PingObject(eraser);
-            Debug.Log("Created EraserTool prefab at Assets/Prefabs/EraserTool.prefab");
         }
     }
 }

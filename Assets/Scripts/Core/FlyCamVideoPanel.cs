@@ -100,12 +100,6 @@ namespace Core
             videoPlayer.prepareCompleted += OnVideoPrepared;
             videoPlayer.loopPointReached += OnVideoEnded;
             videoPlayer.errorReceived    += OnVideoError;
-
-            Debug.Log($"[FlyCamVideoPanel] SetupVideoPlayer — " +
-                      $"renderTexture={renderTexture.width}x{renderTexture.height} created={renderTexture.IsCreated()} " +
-                      $"videoDisplay={(videoDisplay != null ? "OK" : "NULL")} " +
-                      $"targetTexture={(videoPlayer.targetTexture != null ? "OK" : "NULL")} " +
-                      $"renderMode={videoPlayer.renderMode}");
         }
 
         private void RegisterButtonListeners()
@@ -247,7 +241,6 @@ namespace Core
             {
                 renderTexture = new RenderTexture(renderTextureSize.x, renderTextureSize.y, 0);
                 renderTexture.Create();
-                Debug.LogWarning("[FlyCamVideoPanel] RenderTexture was lost — recreated.");
             }
 
             // Configure VideoPlayer fully before Prepare() — do NOT call Stop() as it clears targetTexture
@@ -262,41 +255,21 @@ namespace Core
             if (videoDisplay != null)
                 videoDisplay.texture = renderTexture;
 
-            Debug.Log($"[FlyCamVideoPanel] LoadAndPlayVideo — url='{videoUrl}' " +
-                      $"targetTexture={(videoPlayer.targetTexture != null ? "OK" : "NULL")} " +
-                      $"renderTexture.IsCreated={renderTexture.IsCreated()} " +
-                      $"videoDisplay.texture={(videoDisplay != null && videoDisplay.texture != null ? "OK" : "NULL")}");
-
             videoPlayer.Prepare();
-            Debug.Log("[FlyCamVideoPanel] VideoPlayer.Prepare() called — waiting for prepareCompleted callback.");
         }
 
         private void OnVideoPrepared(VideoPlayer vp)
         {
-            Debug.Log($"[FlyCamVideoPanel] OnVideoPrepared — isPrepared={vp.isPrepared} " +
-                      $"duration={vp.length:F2}s resolution={vp.width}x{vp.height} " +
-                      $"targetTexture={(vp.targetTexture != null ? "OK" : "NULL")} " +
-                      $"renderTexture.IsCreated={renderTexture != null && renderTexture.IsCreated()} " +
-                      $"videoDisplay.texture={(videoDisplay != null ? (videoDisplay.texture != null ? videoDisplay.texture.name : "NULL tex") : "NULL display")}");
-
             if (loadingIndicator != null)
                 loadingIndicator.SetActive(false);
 
-            // Ensure render texture is still wired up after prepare
             if (vp.targetTexture == null)
-            {
-                Debug.LogWarning("[FlyCamVideoPanel] targetTexture was NULL after prepare — re-assigning.");
                 vp.targetTexture = renderTexture;
-            }
 
             if (videoDisplay != null && videoDisplay.texture != renderTexture)
-            {
-                Debug.LogWarning("[FlyCamVideoPanel] videoDisplay.texture mismatch — re-assigning renderTexture.");
                 videoDisplay.texture = renderTexture;
-            }
 
             videoPlayer.Play();
-            Debug.Log($"[FlyCamVideoPanel] Play() called — isPlaying={videoPlayer.isPlaying}");
 
             if (playPauseButtonText != null)
                 playPauseButtonText.text = PauseLabel;

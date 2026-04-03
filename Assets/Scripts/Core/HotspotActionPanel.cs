@@ -53,25 +53,22 @@ namespace Core
             if (flyCamButton != null)
                 flyCamButton.onClick.AddListener(OnFlyCamClicked);
             else
-                Debug.LogError("[HotspotActionPanel] flyCamButton is NULL — assign in Inspector.");
+                Debug.LogError("[HotspotActionPanel] flyCamButton is not assigned in the Inspector.", this);
 
             if (loadMapButton != null)
                 loadMapButton.onClick.AddListener(OnLoadMapClicked);
             else
-                Debug.LogError("[HotspotActionPanel] loadMapButton is NULL — assign in Inspector.");
+                Debug.LogError("[HotspotActionPanel] loadMapButton is not assigned in the Inspector.", this);
 
-            // Cache canvas refs BEFORE SetActive(false)
-            // includeInactive:true ensures we can traverse up even if parent is inactive
             Canvas parent = GetComponentInParent<Canvas>(true);
             if (parent != null)
             {
                 rootCanvas = parent.rootCanvas;
                 canvasRect = rootCanvas.GetComponent<RectTransform>();
-                Debug.Log($"[HotspotActionPanel] Awake — rootCanvas='{rootCanvas.name}' canvasRect={(canvasRect != null ? "OK" : "NULL")} renderMode={rootCanvas.renderMode}");
             }
             else
             {
-                Debug.LogError("[HotspotActionPanel] Awake — no parent Canvas found! Panel must be a child of a Canvas.");
+                Debug.LogError("[HotspotActionPanel] No parent Canvas found — this panel must be a child of a Canvas.", this);
             }
 
             gameObject.SetActive(false);
@@ -105,7 +102,6 @@ namespace Core
             navigator = nav;
             videoPanel = vidPanel;
 
-            // Re-cache canvas if Awake ran before parent was fully set up
             if (rootCanvas == null)
             {
                 Canvas parent = GetComponentInParent<Canvas>(true);
@@ -115,8 +111,6 @@ namespace Core
                     canvasRect = rootCanvas.GetComponent<RectTransform>();
                 }
             }
-
-            Debug.Log($"[HotspotActionPanel] Initialize — navigator={(nav != null ? "OK" : "NULL")} videoPanel={(vidPanel != null ? "OK" : "NULL")} rootCanvas={(rootCanvas != null ? rootCanvas.name : "NULL")}");
         }
 
         /// <summary>Shows the panel anchored near the given hotspot world position.</summary>
@@ -132,9 +126,7 @@ namespace Core
 
             PositionNearHotspot(hotspotWorldPosition);
             targetAlpha = 1f;
-            canvasGroup.alpha = 0f; // reset so fade-in is smooth from 0
-
-            Debug.Log($"[HotspotActionPanel] ShowForRegion '{region.regionId}' worldPos={hotspotWorldPosition} rootCanvas={(rootCanvas != null ? rootCanvas.name : "NULL")}");
+            canvasGroup.alpha = 0f;
         }
 
         /// <summary>
@@ -182,7 +174,7 @@ namespace Core
         {
             if (panelRect == null || rootCanvas == null || canvasRect == null)
             {
-                Debug.LogError($"[HotspotActionPanel] PositionNearHotspot — missing refs: panelRect={(panelRect != null ? "OK" : "NULL")} rootCanvas={(rootCanvas != null ? "OK" : "NULL")} canvasRect={(canvasRect != null ? "OK" : "NULL")}");
+                Debug.LogError("[HotspotActionPanel] Cannot position panel — missing panelRect, rootCanvas, or canvasRect.", this);
                 return;
             }
 
@@ -195,8 +187,6 @@ namespace Core
             bool converted = RectTransformUtility.ScreenPointToLocalPointInRectangle(
                 canvasRect, screenPoint, cam, out Vector2 localPoint);
 
-            Debug.Log($"[HotspotActionPanel] Position — worldPos={worldPosition} screenPoint={screenPoint} converted={converted} localPoint={localPoint} cam={(cam != null ? cam.name : "null(Overlay)")}");
-
             if (!converted) return;
 
             panelRect.anchoredPosition = localPoint + new Vector2(20f, 20f);
@@ -208,10 +198,7 @@ namespace Core
 
             string videoPath = currentRegion.Value.videoResourcePath;
             if (string.IsNullOrEmpty(videoPath))
-            {
-                Debug.LogWarning($"[HotspotActionPanel] No videoResourcePath set for region '{currentRegion.Value.regionId}'.");
                 return;
-            }
 
             videoPanel.Show(videoPath, currentRegion.Value.displayName);
             Hide();

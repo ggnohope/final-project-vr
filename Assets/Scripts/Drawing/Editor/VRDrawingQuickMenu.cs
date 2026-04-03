@@ -27,7 +27,6 @@ namespace VRDrawing.Editor
             {
                 Selection.activeGameObject = existing.gameObject;
                 EditorGUIUtility.PingObject(existing.gameObject);
-                Debug.Log("DrawingModeManager already exists in scene. Selected.");
                 return;
             }
 
@@ -40,7 +39,6 @@ namespace VRDrawing.Editor
             EditorGUIUtility.PingObject(managerObj);
             EditorSceneManager.MarkSceneDirty(UnityEngine.SceneManagement.SceneManager.GetActiveScene());
 
-            Debug.Log("✓ Created DrawingModeManager with auto-assigned references");
             EditorUtility.DisplayDialog("Success", "DrawingModeManager created and configured!", "OK");
         }
 
@@ -132,7 +130,6 @@ namespace VRDrawing.Editor
             var type = assembly.GetType("UnityEditor.LogEntries");
             var method = type.GetMethod("Clear");
             method.Invoke(new object(), null);
-            Debug.Log("Console cleared.");
         }
 
         [MenuItem("Tools/VR Drawing/Utilities/Force Recompile Scripts", priority = 81)]
@@ -140,7 +137,6 @@ namespace VRDrawing.Editor
         {
             AssetDatabase.Refresh();
             UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
-            Debug.Log("Recompiling scripts...");
         }
 
         private static void OpenPrefab(string path)

@@ -204,17 +204,11 @@ namespace VRDrawing.Editor
 
             GameObject boardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Drawing/DrawingBoard.prefab");
             if (boardPrefab != null)
-            {
                 drawingBoardPrefab.objectReferenceValue = boardPrefab;
-                Debug.Log("✓ Assigned Drawing Board Prefab");
-            }
 
             GameObject panelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefabs/Drawing/ToolPanel.prefab");
             if (panelPrefab != null)
-            {
                 toolPanelPrefab.objectReferenceValue = panelPrefab;
-                Debug.Log("✓ Assigned Tool Panel Prefab");
-            }
 
             AutoFindLocomotion(manager);
             FindUIRay();
@@ -223,7 +217,6 @@ namespace VRDrawing.Editor
             serializedObject.ApplyModifiedProperties();
             EditorUtility.SetDirty(manager);
 
-            Debug.Log("=== Auto-Assign Complete ===");
             EditorUtility.DisplayDialog("Success", "All references have been auto-assigned!", "OK");
         }
 
@@ -231,31 +224,19 @@ namespace VRDrawing.Editor
         {
             var teleport = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation.TeleportationProvider>();
             if (teleport != null)
-            {
                 teleportationProvider.objectReferenceValue = teleport;
-                Debug.Log("✓ Found Teleportation Provider");
-            }
 
             var move = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>();
             if (move != null)
-            {
                 continuousMoveProvider.objectReferenceValue = move;
-                Debug.Log("✓ Found Continuous Move Provider");
-            }
 
             var turn = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.ContinuousTurnProvider>();
             if (turn != null)
-            {
                 continuousTurnProvider.objectReferenceValue = turn;
-                Debug.Log("✓ Found Continuous Turn Provider");
-            }
 
             var origin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
             if (origin != null)
-            {
                 xrOrigin.objectReferenceValue = origin.transform;
-                Debug.Log("✓ Found XR Origin");
-            }
 
             serializedObject.ApplyModifiedProperties();
         }
@@ -267,13 +248,7 @@ namespace VRDrawing.Editor
             {
                 var ray = uiRayObj.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>();
                 if (ray != null)
-                {
                     uiRayInteractor.objectReferenceValue = ray;
-                    Debug.Log("✓ Found UI Ray Interactor");
-                }
-            }
-            else
-            {
             }
 
             serializedObject.ApplyModifiedProperties();
@@ -307,91 +282,42 @@ namespace VRDrawing.Editor
             int warnings = 0;
 
             if (drawingBoardPrefab.objectReferenceValue == null)
-            {
                 valid = false;
-            }
 
             if (toolPanelPrefab.objectReferenceValue == null)
-            {
-                Debug.LogWarning("✗ Tool Panel Prefab not assigned");
                 valid = false;
-            }
 
             if (toggleToolPanelAction != null)
             {
                 SerializedProperty useReference = toggleToolPanelAction.FindPropertyRelative("m_UseReference");
                 SerializedProperty reference = toggleToolPanelAction.FindPropertyRelative("m_Reference");
-                
+
                 if (useReference != null && reference != null)
                 {
-                    bool isUsingReference = useReference.boolValue;
-                    bool hasReference = reference.objectReferenceValue != null;
-                    
-                    if (!isUsingReference || !hasReference)
-                    {
-                        Debug.LogWarning("⚠ Toggle Tool Panel Action not assigned (Y Button)");
+                    if (!useReference.boolValue || reference.objectReferenceValue == null)
                         warnings++;
-                    }
                 }
             }
 
-            if (teleportationProvider.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ Teleportation Provider not assigned");
-                warnings++;
-            }
-
-            if (continuousMoveProvider.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ Continuous Move Provider not assigned");
-                warnings++;
-            }
-
-            if (continuousTurnProvider.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ Continuous Turn Provider not assigned");
-                warnings++;
-            }
-
-            if (xrOrigin.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ XR Origin not assigned");
-                warnings++;
-            }
-
-            if (uiRayInteractor.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ UI Ray Interactor not assigned");
-                warnings++;
-            }
-
-            if (playerCamera.objectReferenceValue == null)
-            {
-                Debug.LogWarning("⚠ Player Camera not assigned");
-                warnings++;
-            }
+            if (teleportationProvider.objectReferenceValue == null) warnings++;
+            if (continuousMoveProvider.objectReferenceValue == null) warnings++;
+            if (continuousTurnProvider.objectReferenceValue == null) warnings++;
+            if (xrOrigin.objectReferenceValue == null) warnings++;
+            if (uiRayInteractor.objectReferenceValue == null) warnings++;
+            if (playerCamera.objectReferenceValue == null) warnings++;
 
             if (valid && warnings == 0)
-            {
-                Debug.Log("✓✓✓ Setup is complete and valid!");
-                EditorUtility.DisplayDialog("Validation Success", "DrawingModeManager setup is complete!", "OK");
-            }
+                EditorUtility.DisplayDialog("Validation Passed", "DrawingModeManager setup is complete!", "OK");
             else if (!valid)
-            {
-                Debug.LogError($"Setup has {warnings} warnings and missing critical references");
-                EditorUtility.DisplayDialog("Validation Failed", "Critical references are missing. Check Console.", "OK");
-            }
+                EditorUtility.DisplayDialog("Validation Failed", "Critical references are missing. Check the Inspector.", "OK");
             else
-            {
-                Debug.LogWarning($"Setup has {warnings} warnings but is functional");
-                EditorUtility.DisplayDialog("Validation Warning", $"Setup has {warnings} warnings. Check Console for details.", "OK");
-            }
+                EditorUtility.DisplayDialog("Validation Warning", $"{warnings} optional reference(s) are not assigned.", "OK");
         }
 
         private void ClearAllReferences()
         {
-            if (EditorUtility.DisplayDialog("Clear References", 
-                "Are you sure you want to clear all references?", 
+            if (EditorUtility.DisplayDialog("Clear References",
+                "Are you sure you want to clear all references?",
                 "Yes", "Cancel"))
             {
                 drawingBoardPrefab.objectReferenceValue = null;
@@ -404,7 +330,6 @@ namespace VRDrawing.Editor
                 playerCamera.objectReferenceValue = null;
 
                 serializedObject.ApplyModifiedProperties();
-                Debug.Log("All references cleared");
             }
         }
     }

@@ -27,10 +27,6 @@ namespace Core
 
             if (floorRoot != null)
                 floorRenderers = floorRoot.GetComponentsInChildren<Renderer>(includeInactive: true);
-
-            Debug.Log($"[FloorTransparency] Awake — sceneLoader={(sceneLoader != null ? sceneLoader.name : "NULL")}" +
-                      $" | floorRoot={(floorRoot != null ? floorRoot.name : "NULL")}" +
-                      $" | renderers={floorRenderers.Length}");
         }
 
         private void OnEnable()
@@ -39,11 +35,10 @@ namespace Core
             {
                 sceneLoader.OnSceneLoadStarted += OnSceneLoadStarted;
                 sceneLoader.OnSceneUnloaded    += OnSceneUnloaded;
-                Debug.Log("[FloorTransparency] Subscribed to sceneLoader events.");
             }
             else
             {
-                Debug.LogWarning("[FloorTransparency] sceneLoader is NULL — events NOT subscribed!");
+                Debug.LogWarning("[FloorTransparencyController] sceneLoader is not assigned — floor fade events will not fire.", this);
             }
         }
 
@@ -56,25 +51,18 @@ namespace Core
             }
         }
 
-        // Hide floor as soon as a map starts loading — stay hidden while gsplat is active.
         private void OnSceneLoadStarted(string regionId)
         {
-            Debug.Log($"[FloorTransparency] OnSceneLoadStarted({regionId}) — hiding floor.");
             RestartFade(fadeIn: false);
         }
 
-        // Restore floor only when the gsplat is explicitly unloaded with no new scene loading.
         private void OnSceneUnloaded(string regionId)
         {
             // IsLoading == true means we're switching between gsplat scenes — keep floor hidden.
             // IsLoading == false means full unload with no replacement — restore floor.
             if (sceneLoader != null && sceneLoader.IsLoading)
-            {
-                Debug.Log($"[FloorTransparency] OnSceneUnloaded({regionId}) — switching scene, floor stays hidden.");
                 return;
-            }
 
-            Debug.Log($"[FloorTransparency] OnSceneUnloaded({regionId}) — no new scene, restoring floor.");
             RestartFade(fadeIn: true);
         }
 
@@ -90,7 +78,7 @@ namespace Core
         {
             if (floorRenderers.Length == 0)
             {
-                Debug.LogWarning("[FloorTransparency] No renderers found — nothing to fade. Check floorRoot assignment.");
+                Debug.LogWarning("[FloorTransparencyController] No renderers found on floorRoot — check assignment in Inspector.", this);
                 yield break;
             }
 
@@ -116,13 +104,7 @@ namespace Core
 
             if (!fadeIn)
             {
-                // Disable renderers after fading out — no draw calls at all.
                 SetRenderersEnabled(false);
-                Debug.Log("[FloorTransparency] Floor renderers disabled.");
-            }
-            else
-            {
-                Debug.Log("[FloorTransparency] Floor renderers restored.");
             }
         }
 

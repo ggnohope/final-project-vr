@@ -46,10 +46,6 @@ namespace VRDrawing.Editor
                     "[AnnotationSystemSetupHelper] GeologicalSymbolDatabase not found at " + DatabasePath +
                     ". Run Tools > Geology > Generate Symbol Assets first.");
             }
-            else
-            {
-                Debug.Log("[AnnotationSystemSetupHelper] GeologicalSymbolDatabase found.");
-            }
         }
 
         // ── Scene manager ─────────────────────────────────────────────────────
@@ -61,12 +57,10 @@ namespace VRDrawing.Editor
 
             if (existing != null)
             {
-                Debug.Log("[AnnotationSystemSetupHelper] GeologicalAnnotationManager already in scene.");
                 AssignDatabase(existing);
                 return existing;
             }
 
-            // Try to attach to DrawingModeManager's GameObject first.
             DrawingModeManager dmm = Object.FindFirstObjectByType<DrawingModeManager>();
             GameObject host = dmm != null ? dmm.gameObject : new GameObject(ManagerName);
 
@@ -74,7 +68,6 @@ namespace VRDrawing.Editor
             AssignDatabase(manager);
 
             EditorUtility.SetDirty(host);
-            Debug.Log($"[AnnotationSystemSetupHelper] Added GeologicalAnnotationManager to '{host.name}'.");
             return manager;
         }
 
@@ -90,7 +83,6 @@ namespace VRDrawing.Editor
             {
                 dbProp.objectReferenceValue = db;
                 so.ApplyModifiedProperties();
-                Debug.Log("[AnnotationSystemSetupHelper] Assigned GeologicalSymbolDatabase to manager.");
             }
         }
 
@@ -125,14 +117,12 @@ namespace VRDrawing.Editor
             {
                 paletteProp.objectReferenceValue = palettePrefab;
                 changed = true;
-                Debug.Log("[AnnotationSystemSetupHelper] Assigned SymbolPaletteCanvas prefab to DrawingModeManager.");
             }
 
             if (legendProp != null && legendPrefab != null && legendProp.objectReferenceValue == null)
             {
                 legendProp.objectReferenceValue = legendPrefab;
                 changed = true;
-                Debug.Log("[AnnotationSystemSetupHelper] Assigned AnnotationLegendCanvas prefab to DrawingModeManager.");
             }
 
             if (changed)

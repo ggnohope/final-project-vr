@@ -116,8 +116,6 @@ namespace VRDrawing.Editor
 
         private void RunCompleteSetup()
         {
-            Debug.Log("=== VR Drawing System Auto Setup Started ===");
-
             SetupLayers();
             CreateMaterials();
             CreateDrawingBoardPrefab();
@@ -127,23 +125,13 @@ namespace VRDrawing.Editor
             SetupScene();
 
             setupComplete = true;
-            Debug.Log("=== VR Drawing System Auto Setup Completed ===");
             EditorUtility.DisplayDialog("Setup Complete", "VR Drawing System has been set up successfully!", "OK");
         }
 
         private void SetupLayers()
         {
-            Debug.Log("Setting up layers...");
-
             if (!LayerExists(DRAWING_SURFACE_LAYER))
-            {
                 CreateLayer(DRAWING_SURFACE_LAYER, DRAWING_SURFACE_LAYER_INDEX);
-                Debug.Log($"✓ Created layer: {DRAWING_SURFACE_LAYER} at index {DRAWING_SURFACE_LAYER_INDEX}");
-            }
-            else
-            {
-                Debug.Log($"✓ Layer already exists: {DRAWING_SURFACE_LAYER}");
-            }
         }
 
         private bool LayerExists(string layerName)
@@ -175,8 +163,6 @@ namespace VRDrawing.Editor
 
         private void CreateMaterials()
         {
-            Debug.Log("Creating materials...");
-
             if (!Directory.Exists(MATERIAL_DIR))
             {
                 Directory.CreateDirectory(MATERIAL_DIR);
@@ -189,7 +175,6 @@ namespace VRDrawing.Editor
                 Material canvasMat = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
                 canvasMat.SetColor("_BaseColor", Color.white);
                 AssetDatabase.CreateAsset(canvasMat, canvasMatPath);
-                Debug.Log($"✓ Created material: {canvasMatPath}");
             }
 
             string penMatPath = $"{MATERIAL_DIR}/PenMaterial.mat";
@@ -198,7 +183,6 @@ namespace VRDrawing.Editor
                 Material penMat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 penMat.SetColor("_BaseColor", new Color(0.2f, 0.4f, 0.8f));
                 AssetDatabase.CreateAsset(penMat, penMatPath);
-                Debug.Log($"✓ Created material: {penMatPath}");
             }
 
             AssetDatabase.SaveAssets();
@@ -207,8 +191,6 @@ namespace VRDrawing.Editor
 
         private void CreateDrawingBoardPrefab()
         {
-            Debug.Log("Creating Drawing Board Prefab...");
-
             if (!Directory.Exists(PREFAB_DIR))
             {
                 Directory.CreateDirectory(PREFAB_DIR);
@@ -257,15 +239,12 @@ namespace VRDrawing.Editor
             PrefabUtility.SaveAsPrefabAsset(board, prefabPath);
             DestroyImmediate(board);
 
-            Debug.Log($"✓ Created prefab: {prefabPath}");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
         private void CreateToolPanelPrefab()
         {
-            Debug.Log("Creating Tool Panel Prefab...");
-
             string prefabPath = $"{PREFAB_DIR}/ToolPanel.prefab";
 
             GameObject canvasObj = new GameObject("ToolPanel");
@@ -376,7 +355,6 @@ namespace VRDrawing.Editor
             PrefabUtility.SaveAsPrefabAsset(canvasObj, prefabPath);
             DestroyImmediate(canvasObj);
 
-            Debug.Log($"✓ Created prefab: {prefabPath}");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
@@ -428,8 +406,6 @@ namespace VRDrawing.Editor
 
         private void CreateDrawingBoardActivatorPrefab()
         {
-            Debug.Log("Creating Drawing Board Activator Prefab...");
-
             string prefabPath = $"{PREFAB_DIR}/DrawingBoardActivator.prefab";
 
             GameObject activatorObj = new GameObject("DrawingBoardActivator");
@@ -438,15 +414,12 @@ namespace VRDrawing.Editor
             PrefabUtility.SaveAsPrefabAsset(activatorObj, prefabPath);
             DestroyImmediate(activatorObj);
 
-            Debug.Log($"✓ Created prefab: {prefabPath}");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
         private void CreatePenPrefab()
         {
-            Debug.Log("Creating Pen Prefab...");
-
             string prefabPath = $"{PREFAB_DIR}/Pen.prefab";
 
             GameObject penObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -490,19 +463,15 @@ namespace VRDrawing.Editor
             PrefabUtility.SaveAsPrefabAsset(penObj, prefabPath);
             DestroyImmediate(penObj);
 
-            Debug.Log($"✓ Created prefab: {prefabPath}");
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
         }
 
         private void SetupScene()
         {
-            Debug.Log("Setting up scene...");
-
             DrawingModeManager existing = FindFirstObjectByType<DrawingModeManager>();
             if (existing != null)
             {
-                Debug.Log("✓ DrawingModeManager already exists in scene");
                 AutoAssignReferences(existing);
                 return;
             }
@@ -513,7 +482,6 @@ namespace VRDrawing.Editor
             AutoAssignReferences(manager);
 
             EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-            Debug.Log("✓ Created DrawingModeManager in scene");
         }
 
         private void AutoAssignReferences(DrawingModeManager manager)
@@ -522,63 +490,39 @@ namespace VRDrawing.Editor
 
             GameObject drawingBoardPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PREFAB_DIR}/DrawingBoard.prefab");
             if (drawingBoardPrefab != null)
-            {
                 so.FindProperty("drawingBoardPrefab").objectReferenceValue = drawingBoardPrefab;
-                Debug.Log("✓ Assigned Drawing Board Prefab");
-            }
 
             GameObject toolPanelPrefab = AssetDatabase.LoadAssetAtPath<GameObject>($"{PREFAB_DIR}/ToolPanel.prefab");
             if (toolPanelPrefab != null)
-            {
                 so.FindProperty("toolPanelPrefab").objectReferenceValue = toolPanelPrefab;
-                Debug.Log("✓ Assigned Tool Panel Prefab");
-            }
 
             var teleportProvider = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Teleportation.TeleportationProvider>();
             if (teleportProvider != null)
-            {
                 so.FindProperty("teleportationProvider").objectReferenceValue = teleportProvider;
-                Debug.Log("✓ Assigned Teleportation Provider");
-            }
 
             var moveProvider = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>();
             if (moveProvider != null)
-            {
                 so.FindProperty("continuousMoveProvider").objectReferenceValue = moveProvider;
-                Debug.Log("✓ Assigned Continuous Move Provider");
-            }
 
             var turnProvider = FindFirstObjectByType<UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.ContinuousTurnProvider>();
             if (turnProvider != null)
-            {
                 so.FindProperty("continuousTurnProvider").objectReferenceValue = turnProvider;
-                Debug.Log("✓ Assigned Continuous Turn Provider");
-            }
 
             var xrOrigin = FindFirstObjectByType<Unity.XR.CoreUtils.XROrigin>();
             if (xrOrigin != null)
-            {
                 so.FindProperty("xrOrigin").objectReferenceValue = xrOrigin.transform;
-                Debug.Log("✓ Assigned XR Origin");
-            }
 
             GameObject uiRayObj = GameObject.Find("UI Ray Interactor");
             if (uiRayObj != null)
             {
                 var uiRay = uiRayObj.GetComponent<UnityEngine.XR.Interaction.Toolkit.Interactors.XRRayInteractor>();
                 if (uiRay != null)
-                {
                     so.FindProperty("uiRayInteractor").objectReferenceValue = uiRay;
-                    Debug.Log("✓ Assigned UI Ray Interactor");
-                }
             }
 
             Camera mainCam = Camera.main;
             if (mainCam != null)
-            {
                 so.FindProperty("playerCamera").objectReferenceValue = mainCam.transform;
-                Debug.Log("✓ Assigned Player Camera");
-            }
 
             so.ApplyModifiedProperties();
         }

@@ -143,8 +143,6 @@ namespace VRDrawing.Editor
             EditorUtility.SetDirty(database);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
-
-            Debug.Log($"[GeologicalSymbolAssetGenerator] Generated {symbolList.Count} symbol assets and updated database.");
         }
 
         private static GeologicalSymbolDefinition CreateOrUpdateSymbol(SymbolData data)

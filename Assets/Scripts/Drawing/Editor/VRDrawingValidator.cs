@@ -48,9 +48,7 @@ namespace VRDrawing.Editor
 
         private void RunValidation()
         {
-            Debug.Log("=== VR Drawing System Validation Started ===");
             ValidateAndDisplay();
-            Debug.Log("=== VR Drawing System Validation Completed ===");
         }
 
         private void ValidateAndDisplay()
@@ -114,7 +112,6 @@ namespace VRDrawing.Editor
                 EditorGUILayout.LabelField($"{name} - MISSING", EditorStyles.helpBox);
                 GUI.backgroundColor = Color.white;
                 EditorGUILayout.EndHorizontal();
-                Debug.LogWarning($"Missing prefab: {path}");
             }
         }
 
@@ -141,7 +138,6 @@ namespace VRDrawing.Editor
                 EditorGUILayout.LabelField($"{name} - MISSING", EditorStyles.helpBox);
                 GUI.backgroundColor = Color.white;
                 EditorGUILayout.EndHorizontal();
-                Debug.LogWarning($"Missing material: {path}");
             }
         }
 
@@ -168,7 +164,6 @@ namespace VRDrawing.Editor
                 EditorGUILayout.LabelField($"{name} - NOT FOUND IN SCENE", EditorStyles.helpBox);
                 GUI.backgroundColor = Color.white;
                 EditorGUILayout.EndHorizontal();
-                Debug.LogWarning($"Component not found in scene: {typeof(T).Name}");
             }
         }
 
@@ -199,7 +194,6 @@ namespace VRDrawing.Editor
                 EditorGUILayout.LabelField($"{layerName} - MISSING", EditorStyles.helpBox);
                 GUI.backgroundColor = Color.white;
                 EditorGUILayout.EndHorizontal();
-                Debug.LogWarning($"Layer not found: {layerName}");
             }
         }
     }
